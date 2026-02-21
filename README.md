@@ -10,13 +10,17 @@ Define `UseCase` classes (input → validate → execute → output), connect th
 ## Quick start
 
 ```ts
-import { Input, Output, UseCase, ModularApi } from 'modular_api';
+import { ModularApi, ModuleBuilder } from 'modular_api';
 
+// ─── Module builder (separate file in real projects) ──────────
+function buildGreetingsModule(m: ModuleBuilder): void {
+  m.usecase('hello', HelloWorld.fromJson);
+}
+
+// ─── Server ───────────────────────────────────────────────────
 const api = new ModularApi({ basePath: '/api' });
 
-api.module('greetings', (m) => {
-  m.usecase('hello', SayHello.fromJson);
-});
+api.module('greetings', buildGreetingsModule);
 
 api.serve({ port: 8080 });
 ```
@@ -33,6 +37,8 @@ curl -X POST http://localhost:8080/api/greetings/hello \
 
 **Docs** → `http://localhost:8080/docs`  
 **Health** → `http://localhost:8080/health`
+
+See `example/example.ts` for the full implementation including Input, Output, UseCase with `validate()`, and the builder.
 
 ---
 
@@ -87,7 +93,7 @@ async execute() {
 ```ts
 import { useCaseTestHandler } from 'modular_api';
 
-const handler = useCaseTestHandler(SayHello.fromJson);
+const handler = useCaseTestHandler(HelloWorld.fromJson);
 const response = await handler({ name: 'World' });
 
 console.log(response.statusCode); // 200

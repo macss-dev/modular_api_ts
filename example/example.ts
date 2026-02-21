@@ -14,7 +14,15 @@
  *   http://localhost:8080/docs
  */
 
-import { Input, Output, UseCase, ModularApi } from '../src/index';
+import { Input, Output, UseCase, ModularApi, ModuleBuilder } from '../src/index';
+
+// ─── Module Builder ───────────────────────────────────────────────────────────
+// In a real project, this would live in its own file:
+//   src/modules/greetings/greetings_builder.ts
+
+function buildGreetingsModule(m: ModuleBuilder): void {
+  m.usecase('hello', HelloWorld.fromJson);
+}
 
 // ─── Input DTO ────────────────────────────────────────────────────────────────
 
@@ -24,8 +32,8 @@ class HelloInput extends Input {
   }
 
   static fromJson(json: Record<string, unknown>): HelloInput {
-    if (typeof json['name'] !== 'string') throw new Error('name must be a string');
-    return new HelloInput(json['name']);
+    const name = (json['name'] ?? '').toString();
+    return new HelloInput(name);
   }
 
   toJson() {
@@ -67,13 +75,20 @@ class HelloOutput extends Output {
 
 // ─── UseCase ──────────────────────────────────────────────────────────────────
 
-class SayHello extends UseCase<HelloInput, HelloOutput> {
+class HelloWorld extends UseCase<HelloInput, HelloOutput> {
   constructor(input: HelloInput) {
     super(input);
   }
 
-  static fromJson(json: Record<string, unknown>): SayHello {
-    return new SayHello(HelloInput.fromJson(json));
+  static fromJson(json: Record<string, unknown>): HelloWorld {
+    return new HelloWorld(HelloInput.fromJson(json));
+  }
+
+  override validate(): string | null {
+    if (!this.input.name) {
+      return 'name is required';
+    }
+    return null;
   }
 
   async execute(): Promise<void> {
@@ -85,9 +100,7 @@ class SayHello extends UseCase<HelloInput, HelloOutput> {
 
 const api = new ModularApi({ basePath: '/api', title: 'Greetings API' });
 
-api.module('greetings', (m) => {
-  m.usecase('hello', SayHello.fromJson);
-});
+api.module('greetings', buildGreetingsModule);
 
 api.serve({ port: 8080 }).then(() => {
   console.log('====================================');
@@ -95,8 +108,4 @@ api.serve({ port: 8080 }).then(() => {
   console.log('Docs → http://localhost:8080/docs');
   console.log('Health → http://localhost:8080/health');
   console.log('====================================');
-  console.log('Test with:');
-  console.log('  curl -X POST http://localhost:8080/api/greetings/hello \\');
-  console.log('       -H "Content-Type: application/json" \\');
-  console.log(`       -d '{"name":"World"}'`);
 });

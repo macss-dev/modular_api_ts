@@ -26,10 +26,8 @@ function buildGreetingsModule(m: ModuleBuilder): void {
 
 // ─── Input DTO ────────────────────────────────────────────────────────────────
 
-class HelloInput extends Input {
-  constructor(readonly name: string) {
-    super();
-  }
+class HelloInput implements Input {
+  constructor(readonly name: string) {}
 
   static fromJson(json: Record<string, unknown>): HelloInput {
     const name = (json['name'] ?? '').toString();
@@ -53,9 +51,11 @@ class HelloInput extends Input {
 
 // ─── Output DTO ───────────────────────────────────────────────────────────────
 
-class HelloOutput extends Output {
-  constructor(readonly message: string) {
-    super();
+class HelloOutput implements Output {
+  constructor(readonly message: string) {}
+
+  get statusCode() {
+    return 200;
   }
 
   toJson() {
@@ -75,16 +75,19 @@ class HelloOutput extends Output {
 
 // ─── UseCase ──────────────────────────────────────────────────────────────────
 
-class HelloWorld extends UseCase<HelloInput, HelloOutput> {
+class HelloWorld implements UseCase<HelloInput, HelloOutput> {
+  readonly input: HelloInput;
+  output!: HelloOutput;
+
   constructor(input: HelloInput) {
-    super(input);
+    this.input = input;
   }
 
   static fromJson(json: Record<string, unknown>): HelloWorld {
     return new HelloWorld(HelloInput.fromJson(json));
   }
 
-  override validate(): string | null {
+  validate(): string | null {
     if (!this.input.name) {
       return 'name is required';
     }
@@ -93,6 +96,10 @@ class HelloWorld extends UseCase<HelloInput, HelloOutput> {
 
   async execute(): Promise<void> {
     this.output = new HelloOutput(`Hello, ${this.input.name}!`);
+  }
+
+  toJson(): Record<string, unknown> {
+    return this.output.toJson();
   }
 }
 

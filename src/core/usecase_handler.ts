@@ -54,8 +54,7 @@ export function useCaseHandler<I extends Input, O extends Output>(
       await useCase.execute();
 
       // 5. Respond
-      const output = useCase.getOutput();
-      res.status(output.statusCode).set(JSON_HEADERS).json(useCase.toJson());
+      res.status(useCase.output.statusCode).set(JSON_HEADERS).json(useCase.toJson());
     } catch (err) {
       if (err instanceof UseCaseException) {
         console.error('UseCaseException:', err.toString());

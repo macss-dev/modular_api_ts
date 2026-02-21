@@ -47,9 +47,8 @@ export async function useCaseTestHandler<I extends Input, O extends Output>(
 
     await useCase.execute();
 
-    const output = useCase.getOutput();
     return {
-      statusCode: output.statusCode,
+      statusCode: useCase.output.statusCode,
       body: useCase.toJson(),
     };
   } catch (err) {

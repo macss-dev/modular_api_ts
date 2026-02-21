@@ -5,10 +5,18 @@
 // ============================================================
 
 /**
- * Base class for all use case input DTOs.
- * Every concrete Input must implement:
- *  - toJson()   — serializes the data back to a plain object
- *  - toSchema() — returns an OpenAPI-compatible JSON Schema object
+ * **Contract** — use `implements Input`.
+ *
+ * Pure interface: all members must be provided by the implementor.
+ * No default behavior is inherited — every Input is self-contained.
+ *
+ * ```ts
+ * class HelloInput implements Input {
+ *   constructor(readonly name: string) {}
+ *   toJson()   { return { name: this.name }; }
+ *   toSchema() { return { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }; }
+ * }
+ * ```
  */
 export abstract class Input {
   abstract toJson(): Record<string, unknown>;
@@ -16,28 +24,25 @@ export abstract class Input {
   /**
    * Returns an OpenAPI-compatible JSON Schema describing this input.
    * Used to auto-generate Swagger documentation.
-   *
-   * Example:
-   * ```ts
-   * toSchema() {
-   *   return {
-   *     type: 'object',
-   *     properties: { name: { type: 'string' } },
-   *     required: ['name'],
-   *   };
-   * }
-   * ```
    */
   abstract toSchema(): Record<string, unknown>;
 }
 
 /**
- * Base class for all use case output DTOs.
- * Every concrete Output must implement:
- *  - toJson()   — serializes the result to a plain object (sent as HTTP body)
- *  - toSchema() — returns an OpenAPI-compatible JSON Schema object
+ * **Contract** — use `implements Output`.
  *
- * Override `statusCode` to return a non-200 HTTP status code.
+ * Pure interface: all members must be provided by the implementor.
+ * The implementor must define `statusCode` explicitly — this forces
+ * developers to think about HTTP status codes for every response.
+ *
+ * ```ts
+ * class HelloOutput implements Output {
+ *   constructor(readonly message: string) {}
+ *   get statusCode() { return 200; }
+ *   toJson()   { return { message: this.message }; }
+ *   toSchema() { return { type: 'object', properties: { message: { type: 'string' } }, required: ['message'] }; }
+ * }
+ * ```
  */
 export abstract class Output {
   abstract toJson(): Record<string, unknown>;
@@ -45,12 +50,9 @@ export abstract class Output {
 
   /**
    * HTTP status code for the response.
-   * Override to return 201, 400, 404, etc.
-   * Defaults to 200 OK.
+   * Must be implemented explicitly (e.g. 200, 201, 400, 404).
    */
-  get statusCode(): number {
-    return 200;
-  }
+  abstract get statusCode(): number;
 }
 
 /**
@@ -60,55 +62,59 @@ export abstract class Output {
  * Dart equivalent:
  *   static MyUseCase fromJson(Map<String, dynamic> json) { ... }
  */
-export type UseCaseFactory<I extends Input, O extends Output> = (
+export type UseCaseFactory<I extends Input = Input, O extends Output = Output> = (
   json: Record<string, unknown>
 ) => UseCase<I, O>;
 
 /**
- * Base class for all use cases.
+ * **Contract** — use `implements UseCase<I, O>`.
  *
- * Lifecycle (same as Dart version):
- *   1. fromJson(json)     — build the use case from the HTTP request body
- *   2. validate()         — optional validation; return error string or null
- *   3. execute()          — run business logic, populate this.output
- *   4. output.toJson()    — serialize and return to HTTP client
+ * Pure interface: all members must be provided by the implementor.
+ * This mirrors the Dart version where UseCase is 100% abstract.
  *
- * Dart equivalent:
- *   abstract class UseCase<I extends Input, O extends Output>
+ * Lifecycle (handled by the framework):
+ *   1. `fromJson(json)`    — static factory, builds the use case
+ *   2. `validate()`        — return error string or null
+ *   3. `execute()`         — run business logic, set `this.output`
+ *   4. `output.toJson()`   — serialize and return to HTTP client
  *
- * TypeScript usage:
  * ```ts
- * class SayHello extends UseCase<HelloInput, HelloOutput> {
- *   constructor(input: HelloInput) { super(input); }
+ * class SayHello implements UseCase<HelloInput, HelloOutput> {
+ *   input: HelloInput;
+ *   output!: HelloOutput;
+ *
+ *   constructor(input: HelloInput) { this.input = input; }
  *
  *   static fromJson(json: Record<string, unknown>) {
  *     return new SayHello(HelloInput.fromJson(json));
  *   }
  *
- *   validate() { return null; }
+ *   validate(): string | null {
+ *     if (!this.input.name) return 'name is required';
+ *     return null;
+ *   }
  *
- *   async execute() {
+ *   async execute(): Promise<void> {
  *     this.output = new HelloOutput(`Hello, ${this.input.name}!`);
  *   }
+ *
+ *   toJson() { return this.output.toJson(); }
  * }
  * ```
  */
 export abstract class UseCase<I extends Input, O extends Output> {
-  /** Populated in execute(). Must be set before execute() returns. */
-  protected output!: O;
+  /** Input DTO — set in constructor. */
+  abstract readonly input: I;
 
-  constructor(protected readonly input: I) {}
+  /** Output DTO — set in execute(). */
+  abstract output: O;
 
   /**
-   * Optional synchronous validation.
+   * Synchronous validation.
    * Return a human-readable error string to abort execution with HTTP 400.
    * Return null to proceed.
-   *
-   * Dart equivalent:  String? validate()
    */
-  validate(): string | null {
-    return null;
-  }
+  abstract validate(): string | null;
 
   /**
    * Business logic. Must set `this.output` before returning.
@@ -118,25 +124,7 @@ export abstract class UseCase<I extends Input, O extends Output> {
 
   /**
    * Serializes the output DTO to a plain object for the HTTP response.
-   * Delegates to this.output.toJson().
+   * Typically implemented as `return this.output.toJson();`
    */
-  toJson(): Record<string, unknown> {
-    return this.output.toJson();
-  }
-
-  /**
-   * Exposes the output DTO so the handler can read statusCode.
-   * @internal
-   */
-  getOutput(): O {
-    return this.output;
-  }
-
-  /**
-   * Exposes the input DTO for OpenAPI schema introspection.
-   * @internal
-   */
-  getInput(): I {
-    return this.input;
-  }
+  abstract toJson(): Record<string, unknown>;
 }

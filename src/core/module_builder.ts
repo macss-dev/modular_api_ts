@@ -101,8 +101,8 @@ export class ModuleBuilder {
     try {
       const instance = factory({});
       return {
-        input: instance.getInput().toSchema(),
-        output: instance.getOutput()?.toSchema?.() ?? {},
+        input: instance.input.toSchema(),
+        output: instance.output?.toSchema?.() ?? {},
       };
     } catch {
       return { input: {}, output: {} };

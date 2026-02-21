@@ -1,0 +1,37 @@
+{
+  "name": "modular_api",
+  "version": "0.1.0",
+  "description": "Use-case-centric toolkit for building modular APIs with Express. Define UseCase classes (input → validate → execute → output), connect them to HTTP routes, and expose Swagger/OpenAPI documentation automatically.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "dev": "ts-node src/index.ts",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "api",
+    "usecase",
+    "openapi",
+    "express",
+    "modular"
+  ],
+  "author": "ccisne.dev",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.1",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.11",
+    "@types/swagger-ui-express": "^4.1.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

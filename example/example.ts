@@ -105,7 +105,5 @@ api.module('greetings', buildGreetingsModule);
 api.serve({ port: 8080 }).then(() => {
   console.log('====================================');
   console.log('API  → http://localhost:8080/api/greetings/hello');
-  console.log('Docs → http://localhost:8080/docs');
-  console.log('Health → http://localhost:8080/health');
   console.log('====================================');
 });

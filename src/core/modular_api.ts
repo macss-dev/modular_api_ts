@@ -12,12 +12,22 @@ import express, {
 import { ModuleBuilder } from './module_builder';
 import { buildOpenApiSpec } from '../openapi/openapi';
 import swaggerUi from 'swagger-ui-express';
+import type { HealthCheck } from './health/health_check';
+import { HealthService } from './health/health_service';
+import { healthHandler } from './health/health_handler';
 
 export interface ModularApiOptions {
   /** Base path prefix for all module routes. Default: '/api' */
   basePath?: string;
   /** API title shown in Swagger UI. Default: 'API' */
   title?: string;
+  /** API version string (e.g. '1.0.0'). Used in health check response. Default: '0.0.0' */
+  version?: string;
+  /**
+   * Release identifier. Defaults to `version-debug`.
+   * Override via `process.env.RELEASE_ID`.
+   */
+  releaseId?: string;
 }
 
 /**
@@ -38,7 +48,7 @@ export interface ModularApiOptions {
  * ```
  *
  * Auto-mounted endpoints:
- *   GET /health  → 200 "ok"
+ *   GET /health  → 200/503 application/health+json (IETF draft)
  *   GET /docs    → Swagger UI
  */
 export class ModularApi {
@@ -47,16 +57,35 @@ export class ModularApi {
   private readonly basePath: string;
   private readonly title: string;
   private readonly middlewares: RequestHandler[] = [];
+  private readonly healthService: HealthService;
 
   constructor(options: ModularApiOptions = {}) {
     this.basePath = options.basePath ?? '/api';
-    this.title = options.title ?? 'API';
+    this.title = options.title ?? 'Modular API';
+
+    this.healthService = new HealthService({
+      version: options.version ?? 'x.y.z',
+      releaseId: options.releaseId,
+    });
 
     this.app = express();
     this.app.use(express.json());
 
     this.rootRouter = express.Router();
     this.app.use(this.rootRouter);
+  }
+
+  /**
+   * Register a {@link HealthCheck} to be evaluated on `GET /health`.
+   * Returns `this` for method chaining.
+   *
+   * ```ts
+   * api.addHealthCheck(new DatabaseHealthCheck());
+   * ```
+   */
+  addHealthCheck(check: HealthCheck): this {
+    this.healthService.addHealthCheck(check);
+    return this;
   }
 
   /**
@@ -111,8 +140,8 @@ export class ModularApi {
         this.app.use(mw);
       }
 
-      // Health endpoint
-      this.app.get('/health', (_req, res) => res.status(200).send('ok'));
+      // Health endpoint — IETF Health Check Response Format
+      this.app.get('/health', healthHandler(this.healthService));
 
       // Swagger / OpenAPI docs
       const spec = buildOpenApiSpec({ title: this.title, port });

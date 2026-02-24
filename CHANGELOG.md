@@ -6,6 +6,24 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Documentation
 
+## [0.2.0] - 2026-02-24
+### Added
+- **IETF Health Check Response Format** — `GET /health` now returns `application/health+json` following [draft-inadarei-api-health-check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check)
+- `HealthCheck` abstract class — implement to register custom health checks (database, cache, queue, etc.)
+- `HealthCheckResult` — result DTO with `status`, `responseTime` (ms), and optional `output`
+- `HealthStatus` type — `'pass' | 'warn' | 'fail'` with worst-status-wins aggregation
+- `HealthService` — executes checks in parallel with per-check configurable timeout (default: 5s)
+- `HealthResponse` — aggregated response with `version`, `releaseId`, `checks` map, and `httpStatusCode` (200 for pass/warn, 503 for fail)
+- `healthHandler()` — Express handler for `GET /health`
+- `ModularApi.addHealthCheck()` — register health checks via method chaining
+- `ModularApiOptions` now accepts `version` and optional `releaseId`
+- `releaseId` defaults to `version-debug`; override via `process.env.RELEASE_ID`
+- Test infrastructure: vitest + supertest
+
+### Changed
+- **BREAKING:** `GET /health` response changed from plaintext `ok` to JSON `application/health+json`
+- **BREAKING:** `ModularApiOptions` extended — `version` parameter added (defaults to `'0.0.0'`)
+
 ## [0.1.0] - 2026-02-21
 ### Added
 - **Initial release** — TypeScript port of [modular_api](https://pub.dev/packages/modular_api) (Dart)

@@ -14,7 +14,7 @@
  *   http://localhost:8080/docs
  */
 
-import { Input, Output, UseCase, ModularApi, ModuleBuilder } from '../src/index';
+import { Input, Output, UseCase, ModularApi, ModuleBuilder, HealthCheck, HealthCheckResult } from '../src/index';
 
 // ─── Module Builder ───────────────────────────────────────────────────────────
 // In a real project, this would live in its own file:
@@ -103,9 +103,27 @@ class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   }
 }
 
+// ─── Example Health Check ─────────────────────────────────────────────────────
+// In a real project you'd check a database connection, external service, etc.
+
+class AlwaysPassHealthCheck extends HealthCheck {
+  readonly name = 'example';
+
+  async check(): Promise<HealthCheckResult> {
+    return new HealthCheckResult('pass');
+  }
+}
+
 // ─── Server ───────────────────────────────────────────────────────────────────
 
-const api = new ModularApi({ basePath: '/api', title: 'Greetings API' });
+const api = new ModularApi({
+  basePath: '/api',
+  title: 'Modular API',
+  version: '0.2.0',
+});
+
+// Register health checks (optional — /health works without any checks)
+api.addHealthCheck(new AlwaysPassHealthCheck());
 
 api.module('greetings', buildGreetingsModule);
 

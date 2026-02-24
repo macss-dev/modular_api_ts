@@ -26,3 +26,10 @@ export type { TestResponse } from './core/usecase_test_handler';
 // Middlewares
 export { cors } from './middlewares/cors';
 export type { CorsOptions } from './middlewares/cors';
+
+// Health — IETF Health Check Response Format
+export { HealthCheck, HealthCheckResult } from './core/health/health_check';
+export type { HealthStatus } from './core/health/health_check';
+export { HealthService, HealthResponse } from './core/health/health_service';
+export type { HealthServiceOptions } from './core/health/health_service';
+export { healthHandler } from './core/health/health_handler';

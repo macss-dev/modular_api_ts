@@ -53,6 +53,7 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 - `cors()` middleware — built-in CORS support
 - Swagger UI at `/docs` — auto-generated from registered use cases
 - Health check at `GET /health` — [IETF Health Check Response Format](doc/health_check_guide.md)
+- Prometheus metrics at `GET /metrics` — [Prometheus exposition format](doc/metrics_guide.md)
 - All endpoints default to `POST` (configurable per use case)
 - Full TypeScript declarations (`.d.ts`) included
 

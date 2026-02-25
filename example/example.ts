@@ -127,7 +127,7 @@ class AlwaysPassHealthCheck extends HealthCheck {
 const api = new ModularApi({
   basePath: '/api',
   title: 'Modular API',
-  version: '0.2.0',
+  version: '1.0.0',
   metricsEnabled: true,
 });
 

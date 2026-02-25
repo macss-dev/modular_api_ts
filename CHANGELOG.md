@@ -21,6 +21,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - `ModularApi.addHealthCheck()` — register health checks via method chaining
 - `ModularApiOptions` now accepts `version` and optional `releaseId`
 - `releaseId` defaults to `version-debug`; override via `process.env.RELEASE_ID`
+- **Prometheus Metrics Endpoint** — opt-in `GET /metrics` in [Prometheus text exposition format](https://prometheus.io/docs/instrumenting/exposition_formats/)
+- `MetricsRegistrar` — public API for registering custom metrics via `api.metrics`
+- `metricsEnabled`, `metricsPath`, `excludedMetricsRoutes` constructor options
+- Built-in HTTP instrumentation: `http_requests_total`, `http_request_duration_seconds`, `http_requests_in_flight`, `process_start_time_seconds`
+- `prom-client` dependency for Prometheus metric types
 - Test infrastructure: vitest + supertest
 
 ### Changed

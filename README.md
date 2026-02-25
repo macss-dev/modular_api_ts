@@ -32,7 +32,7 @@ curl -X POST http://localhost:8080/api/greetings/hello \
 ```
 
 ```json
-{"message":"Hello, World!"}
+{ "message": "Hello, World!" }
 ```
 
 **Docs** → `http://localhost:8080/docs`  
@@ -52,7 +52,8 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 - `useCaseTestHandler` — unit test helper (no HTTP server needed)
 - `cors()` middleware — built-in CORS support
 - Swagger UI at `/docs` — auto-generated from registered use cases
-- Health check at `GET /health`
+- Health check at `GET /health` — [IETF Health Check Response Format](doc/health_check_guide.md)
+- Prometheus metrics at `GET /metrics` — [Prometheus exposition format](doc/metrics_guide.md)
 - All endpoints default to `POST` (configurable per use case)
 - Full TypeScript declarations (`.d.ts`) included
 
@@ -83,7 +84,7 @@ async execute() {
 ```
 
 ```json
-{"error": "USER_NOT_FOUND", "message": "User not found"}
+{ "error": "USER_NOT_FOUND", "message": "User not found" }
 ```
 
 ---
@@ -97,7 +98,7 @@ const handler = useCaseTestHandler(HelloWorld.fromJson);
 const response = await handler({ name: 'World' });
 
 console.log(response.statusCode); // 200
-console.log(response.body);       // { message: 'Hello, World!' }
+console.log(response.body); // { message: 'Hello, World!' }
 ```
 
 ---

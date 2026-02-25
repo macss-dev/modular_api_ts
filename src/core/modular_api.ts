@@ -4,20 +4,36 @@
 // Mirror of ModularApi in Dart.
 // ============================================================
 
-import express, {
-  type Express,
-  type RequestHandler,
-  type Router,
-} from 'express';
+import express, { type Express, type RequestHandler, type Router } from 'express';
 import { ModuleBuilder } from './module_builder';
 import { buildOpenApiSpec } from '../openapi/openapi';
 import swaggerUi from 'swagger-ui-express';
+import type { HealthCheck } from './health/health_check';
+import { HealthService } from './health/health_service';
+import { healthHandler } from './health/health_handler';
+import { MetricRegistry, MetricsRegistrar } from './metrics/metric_registry';
+import { metricsMiddleware, metricsHandler } from './metrics/metrics_middleware';
+import { apiRegistry } from './registry';
+import type { Counter, Gauge, Histogram } from 'prom-client';
 
 export interface ModularApiOptions {
   /** Base path prefix for all module routes. Default: '/api' */
   basePath?: string;
   /** API title shown in Swagger UI. Default: 'API' */
   title?: string;
+  /** API version string (e.g. '1.0.0'). Used in health check response. Default: '0.0.0' */
+  version?: string;
+  /**
+   * Release identifier. Defaults to `version-debug`.
+   * Override via `process.env.RELEASE_ID`.
+   */
+  releaseId?: string;
+  /** Opt-in Prometheus metrics endpoint. Default: false */
+  metricsEnabled?: boolean;
+  /** Path for the metrics endpoint. Default: '/metrics' */
+  metricsPath?: string;
+  /** Routes excluded from instrumentation. Default: ['/metrics', '/health', '/docs'] */
+  excludedMetricsRoutes?: string[];
 }
 
 /**
@@ -38,7 +54,7 @@ export interface ModularApiOptions {
  * ```
  *
  * Auto-mounted endpoints:
- *   GET /health  → 200 "ok"
+ *   GET /health  → 200/503 application/health+json (IETF draft)
  *   GET /docs    → Swagger UI
  */
 export class ModularApi {
@@ -47,16 +63,73 @@ export class ModularApi {
   private readonly basePath: string;
   private readonly title: string;
   private readonly middlewares: RequestHandler[] = [];
+  private readonly healthService: HealthService;
+
+  // Metrics
+  private readonly metricsEnabled: boolean;
+  private readonly metricsPath: string;
+  private readonly excludedMetricsRoutes: string[];
+  private readonly metricRegistry?: MetricRegistry;
+  private readonly _metricsRegistrar?: MetricsRegistrar;
+  private readonly httpRequestsTotal?: Counter<'method' | 'route' | 'status_code'>;
+  private readonly httpRequestsInFlight?: Gauge;
+  private readonly httpRequestDuration?: Histogram<'method' | 'route' | 'status_code'>;
+
+  /** Public accessor for custom-metric registration. Undefined when metrics are disabled. */
+  get metrics(): MetricsRegistrar | undefined {
+    return this._metricsRegistrar;
+  }
 
   constructor(options: ModularApiOptions = {}) {
     this.basePath = options.basePath ?? '/api';
-    this.title = options.title ?? 'API';
+    this.title = options.title ?? 'Modular API';
+
+    this.healthService = new HealthService({
+      version: options.version ?? 'x.y.z',
+      releaseId: options.releaseId,
+    });
+
+    // Metrics setup
+    this.metricsEnabled = options.metricsEnabled ?? false;
+    this.metricsPath = options.metricsPath ?? '/metrics';
+    this.excludedMetricsRoutes = options.excludedMetricsRoutes ?? ['/metrics', '/health', '/docs'];
+
+    if (this.metricsEnabled) {
+      this.metricRegistry = new MetricRegistry();
+      this._metricsRegistrar = new MetricsRegistrar(this.metricRegistry);
+      this.httpRequestsTotal = this.metricRegistry.createCounter({
+        name: 'http_requests_total',
+        help: 'Total number of HTTP requests.',
+        labelNames: ['method', 'route', 'status_code'] as const,
+      });
+      this.httpRequestsInFlight = this.metricRegistry.createGauge({
+        name: 'http_requests_in_flight',
+        help: 'Number of HTTP requests currently being processed.',
+      });
+      this.httpRequestDuration = this.metricRegistry.createHistogram({
+        name: 'http_request_duration_seconds',
+        help: 'HTTP request duration in seconds.',
+        labelNames: ['method', 'route', 'status_code'] as const,
+      });
+    }
 
     this.app = express();
     this.app.use(express.json());
 
     this.rootRouter = express.Router();
-    this.app.use(this.rootRouter);
+  }
+
+  /**
+   * Register a {@link HealthCheck} to be evaluated on `GET /health`.
+   * Returns `this` for method chaining.
+   *
+   * ```ts
+   * api.addHealthCheck(new DatabaseHealthCheck());
+   * ```
+   */
+  addHealthCheck(check: HealthCheck): this {
+    this.healthService.addHealthCheck(check);
+    return this;
   }
 
   /**
@@ -106,13 +179,41 @@ export class ModularApi {
     const { port, host = '0.0.0.0' } = options;
 
     return new Promise((resolve) => {
+      // Metrics middleware FIRST — before user middlewares & routes.
+      // Created here so registeredPaths is populated from apiRegistry.
+      if (
+        this.metricsEnabled &&
+        this.httpRequestsTotal &&
+        this.httpRequestsInFlight &&
+        this.httpRequestDuration
+      ) {
+        const registeredPaths = apiRegistry.routes.map((r) => r.path);
+        this.app.use(
+          metricsMiddleware({
+            requestsTotal: this.httpRequestsTotal,
+            requestsInFlight: this.httpRequestsInFlight,
+            requestDuration: this.httpRequestDuration,
+            excludedRoutes: this.excludedMetricsRoutes,
+            registeredPaths,
+          }),
+        );
+      }
+
       // Register middlewares before routes
       for (const mw of this.middlewares) {
         this.app.use(mw);
       }
 
-      // Health endpoint
-      this.app.get('/health', (_req, res) => res.status(200).send('ok'));
+      // Metrics endpoint (before rootRouter — its own handler).
+      if (this.metricsEnabled && this.metricRegistry) {
+        this.app.get(this.metricsPath, metricsHandler(this.metricRegistry));
+      }
+
+      // Health endpoint — IETF Health Check Response Format
+      this.app.get('/health', healthHandler(this.healthService));
+
+      // Module use case routes.
+      this.app.use(this.rootRouter);
 
       // Swagger / OpenAPI docs
       const spec = buildOpenApiSpec({ title: this.title, port });
@@ -121,6 +222,9 @@ export class ModularApi {
       const server = this.app.listen(port, host, () => {
         console.log(`Docs  → http://localhost:${port}/docs`);
         console.log(`Health → http://localhost:${port}/health`);
+        if (this.metricsEnabled) {
+          console.log(`Metrics → http://localhost:${port}${this.metricsPath}`);
+        }
         resolve(server);
       });
     });

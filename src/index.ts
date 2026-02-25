@@ -26,3 +26,15 @@ export type { TestResponse } from './core/usecase_test_handler';
 // Middlewares
 export { cors } from './middlewares/cors';
 export type { CorsOptions } from './middlewares/cors';
+
+// Health — IETF Health Check Response Format
+export { HealthCheck, HealthCheckResult } from './core/health/health_check';
+export type { HealthStatus } from './core/health/health_check';
+export { HealthService, HealthResponse } from './core/health/health_service';
+export type { HealthServiceOptions } from './core/health/health_service';
+export { healthHandler } from './core/health/health_handler';
+
+// Metrics — Prometheus /metrics endpoint
+export { MetricRegistry, MetricsRegistrar } from './core/metrics/metric_registry';
+export { metricsMiddleware, metricsHandler } from './core/metrics/metrics_middleware';
+export type { MetricsMiddlewareOptions } from './core/metrics/metrics_middleware';

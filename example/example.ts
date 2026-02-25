@@ -120,10 +120,19 @@ const api = new ModularApi({
   basePath: '/api',
   title: 'Modular API',
   version: '0.2.0',
+  metricsEnabled: true,
 });
 
 // Register health checks (optional — /health works without any checks)
 api.addHealthCheck(new AlwaysPassHealthCheck());
+
+// Register a custom metric (optional).
+if (api.metrics) {
+  api.metrics.createCounter({
+    name: 'greetings_total',
+    help: 'Total number of greetings sent.',
+  });
+}
 
 api.module('greetings', buildGreetingsModule);
 

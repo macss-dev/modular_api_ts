@@ -220,11 +220,11 @@ export class ModularApi {
       this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
 
       const server = this.app.listen(port, host, () => {
+        console.log(`Docs  → http://localhost:${port}/docs`);
+        console.log(`Health → http://localhost:${port}/health`);
         if (this.metricsEnabled) {
           console.log(`Metrics → http://localhost:${port}${this.metricsPath}`);
         }
-        console.log(`Docs  → http://localhost:${port}/docs`);
-        console.log(`Health → http://localhost:${port}/health`);
         resolve(server);
       });
     });

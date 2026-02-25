@@ -33,10 +33,7 @@ export class HealthCheckResult {
   readonly responseTime?: number;
   readonly output?: string;
 
-  constructor(
-    status: HealthStatus,
-    options?: { responseTime?: number; output?: string },
-  ) {
+  constructor(status: HealthStatus, options?: { responseTime?: number; output?: string }) {
     this.status = status;
     this.responseTime = options?.responseTime;
     this.output = options?.output;

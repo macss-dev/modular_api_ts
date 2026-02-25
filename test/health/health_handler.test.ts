@@ -1,11 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import express from 'express';
 import request from 'supertest';
-import {
-  HealthStatus,
-  HealthCheckResult,
-  HealthCheck,
-} from '../../src/core/health/health_check';
+import { HealthStatus, HealthCheckResult, HealthCheck } from '../../src/core/health/health_check';
 import { HealthService } from '../../src/core/health/health_service';
 import { healthHandler } from '../../src/core/health/health_handler';
 
@@ -56,9 +52,7 @@ describe('healthHandler — HTTP integration', () => {
 
   it('GET /health returns 200 when status is warn', async () => {
     const service = new HealthService({ version: '1.0.0' });
-    service.addHealthCheck(
-      new FakeCheck('cache', 'warn', 'high latency'),
-    );
+    service.addHealthCheck(new FakeCheck('cache', 'warn', 'high latency'));
     const app = createApp(service);
 
     const res = await request(app).get('/health');

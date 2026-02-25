@@ -1,4 +1,5 @@
 # Changelog
+
 All notable changes to this project will be documented in this file.
 
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
@@ -7,7 +8,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 ### Documentation
 
 ## [0.2.0] - 2026-02-24
+
 ### Added
+
 - **IETF Health Check Response Format** — `GET /health` now returns `application/health+json` following [draft-inadarei-api-health-check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check)
 - `HealthCheck` abstract class — implement to register custom health checks (database, cache, queue, etc.)
 - `HealthCheckResult` — result DTO with `status`, `responseTime` (ms), and optional `output`
@@ -21,11 +24,14 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - Test infrastructure: vitest + supertest
 
 ### Changed
+
 - **BREAKING:** `GET /health` response changed from plaintext `ok` to JSON `application/health+json`
 - **BREAKING:** `ModularApiOptions` extended — `version` parameter added (defaults to `'0.0.0'`)
 
 ## [0.1.0] - 2026-02-21
+
 ### Added
+
 - **Initial release** — TypeScript port of [modular_api](https://pub.dev/packages/modular_api) (Dart)
 - `UseCase<I, O>`, `Input`, `Output` — abstract base classes for use-case centric architecture
 - `UseCaseFactory<I, O>` — type alias for static `fromJson` factories
@@ -44,6 +50,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - Full TypeScript declarations (`.d.ts`) included
 
 ### Stack
+
 - Express 4.x
 - swagger-ui-express 5.x
 - TypeScript 5.x, strict mode, ES2020 target

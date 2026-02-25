@@ -32,7 +32,7 @@ export interface TestResponse {
  */
 export async function useCaseTestHandler<I extends Input, O extends Output>(
   factory: UseCaseFactory<I, O>,
-  input: Record<string, unknown> = {}
+  input: Record<string, unknown> = {},
 ): Promise<TestResponse> {
   try {
     const useCase = factory(input);

@@ -63,7 +63,7 @@ export abstract class Output {
  *   static MyUseCase fromJson(Map<String, dynamic> json) { ... }
  */
 export type UseCaseFactory<I extends Input = Input, O extends Output = Output> = (
-  json: Record<string, unknown>
+  json: Record<string, unknown>,
 ) => UseCase<I, O>;
 
 /**

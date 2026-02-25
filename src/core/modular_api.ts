@@ -4,11 +4,7 @@
 // Mirror of ModularApi in Dart.
 // ============================================================
 
-import express, {
-  type Express,
-  type RequestHandler,
-  type Router,
-} from 'express';
+import express, { type Express, type RequestHandler, type Router } from 'express';
 import { ModuleBuilder } from './module_builder';
 import { buildOpenApiSpec } from '../openapi/openapi';
 import swaggerUi from 'swagger-ui-express';
@@ -96,9 +92,7 @@ export class ModularApi {
     // Metrics setup
     this.metricsEnabled = options.metricsEnabled ?? false;
     this.metricsPath = options.metricsPath ?? '/metrics';
-    this.excludedMetricsRoutes = options.excludedMetricsRoutes ?? [
-      '/metrics', '/health', '/docs',
-    ];
+    this.excludedMetricsRoutes = options.excludedMetricsRoutes ?? ['/metrics', '/health', '/docs'];
 
     if (this.metricsEnabled) {
       this.metricRegistry = new MetricRegistry();

@@ -14,7 +14,15 @@
  *   http://localhost:8080/docs
  */
 
-import { Input, Output, UseCase, ModularApi, ModuleBuilder, HealthCheck, HealthCheckResult } from '../src/index';
+import {
+  Input,
+  Output,
+  UseCase,
+  ModularApi,
+  ModuleBuilder,
+  HealthCheck,
+  HealthCheckResult,
+} from '../src/index';
 
 // ─── Module Builder ───────────────────────────────────────────────────────────
 // In a real project, this would live in its own file:

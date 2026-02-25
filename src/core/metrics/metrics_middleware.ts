@@ -64,9 +64,6 @@ export function metricsMiddleware(opts: MetricsMiddlewareOptions): RequestHandle
 export function metricsHandler(registry: MetricRegistry): RequestHandler {
   return async (_req, res) => {
     const body = await registry.serialize();
-    res
-      .status(200)
-      .set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
-      .send(body);
+    res.status(200).set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8').send(body);
   };
 }

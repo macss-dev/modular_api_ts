@@ -42,7 +42,7 @@ export class ModuleBuilder {
   constructor(
     private readonly basePath: string,
     private readonly moduleName: string,
-    private readonly rootRouter: Router
+    private readonly rootRouter: Router,
   ) {
     this.router = Router();
   }
@@ -57,7 +57,7 @@ export class ModuleBuilder {
   usecase<I extends Input, O extends Output>(
     name: string,
     factory: UseCaseFactory<I, O>,
-    options: UseCaseOptions = {}
+    options: UseCaseOptions = {},
   ): this {
     const { method = 'POST', summary, description, inputSchema, outputSchema } = options;
 
@@ -96,7 +96,7 @@ export class ModuleBuilder {
 
   /** Try to get schemas from a dummy factory call. Fails gracefully. */
   private _extractSchemas<I extends Input, O extends Output>(
-    factory: UseCaseFactory<I, O>
+    factory: UseCaseFactory<I, O>,
   ): { input: Record<string, unknown>; output: Record<string, unknown> } {
     try {
       const instance = factory({});

@@ -33,9 +33,7 @@ export function buildOpenApiSpec(options: OpenApiOptions): Record<string, unknow
     servers,
   } = options;
 
-  const defaultServers = [
-    { url: `http://localhost:${port}`, description: 'Local' },
-  ];
+  const defaultServers = [{ url: `http://localhost:${port}`, description: 'Local' }];
 
   const paths: Record<string, unknown> = {};
 

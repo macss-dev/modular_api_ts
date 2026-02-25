@@ -22,7 +22,7 @@ Without any registered checks the endpoint responds **200** with:
 ```ts
 const api = new ModularApi({
   basePath: '/api/v1',
-  version: '1.0.0',          // required for a meaningful health response
+  version: '1.0.0', // required for a meaningful health response
   releaseId: '1.0.0-abc123', // optional — see Release ID below
 });
 ```
@@ -45,17 +45,18 @@ class DatabaseHealthCheck extends HealthCheck {
   }
 }
 
-const api = new ModularApi({ basePath: '/api/v1', version: '1.0.0' })
-  .addHealthCheck(new DatabaseHealthCheck());
+const api = new ModularApi({ basePath: '/api/v1', version: '1.0.0' }).addHealthCheck(
+  new DatabaseHealthCheck(),
+);
 ```
 
 Each `HealthCheck` must provide:
 
-| Member | Description |
-|--------|-------------|
-| `name` | Key in the `checks` map (e.g. `"database"`) |
+| Member    | Description                                  |
+| --------- | -------------------------------------------- |
+| `name`    | Key in the `checks` map (e.g. `"database"`)  |
 | `check()` | Async method returning a `HealthCheckResult` |
-| `timeout` | Optional getter. Default `5000` ms |
+| `timeout` | Optional getter. Default `5000` ms           |
 
 ---
 
@@ -73,11 +74,11 @@ new HealthCheckResult('pass', { output: 'Optional message' });
 
 All checks run **in parallel**. The overall status uses **worst-status-wins**:
 
-| Check results | Overall status | HTTP code |
-|---------------|----------------|-----------|
-| All `pass` | `pass` | 200 |
-| Any `warn`, none `fail` | `warn` | 200 |
-| Any `fail` | `fail` | 503 |
+| Check results           | Overall status | HTTP code |
+| ----------------------- | -------------- | --------- |
+| All `pass`              | `pass`         | 200       |
+| Any `warn`, none `fail` | `warn`         | 200       |
+| Any `fail`              | `fail`         | 503       |
 
 A check that **throws** or **exceeds its timeout** is marked `fail`.
 

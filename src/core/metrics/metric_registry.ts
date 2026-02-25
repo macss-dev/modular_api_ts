@@ -20,9 +20,7 @@ const VALID_NAME = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 
 function assertValidName(name: string): void {
   if (!name || !VALID_NAME.test(name)) {
-    throw new Error(
-      `Invalid metric name "${name}": must match [a-zA-Z_:][a-zA-Z0-9_:]*`,
-    );
+    throw new Error(`Invalid metric name "${name}": must match [a-zA-Z_:][a-zA-Z0-9_:]*`);
   }
 }
 

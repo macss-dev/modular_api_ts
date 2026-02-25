@@ -2,10 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import express from 'express';
 import request from 'supertest';
 import { MetricRegistry } from '../../src/core/metrics/metric_registry';
-import {
-  metricsMiddleware,
-  metricsHandler,
-} from '../../src/core/metrics/metrics_middleware';
+import { metricsMiddleware, metricsHandler } from '../../src/core/metrics/metrics_middleware';
 import type { Counter, Gauge, Histogram } from 'prom-client';
 
 describe('metricsMiddleware', () => {
@@ -32,10 +29,7 @@ describe('metricsMiddleware', () => {
     });
   });
 
-  function createApp(opts?: {
-    excludedRoutes?: string[];
-    registeredPaths?: string[];
-  }) {
+  function createApp(opts?: { excludedRoutes?: string[]; registeredPaths?: string[] }) {
     const app = express();
     app.use(
       metricsMiddleware({

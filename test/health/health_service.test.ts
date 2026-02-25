@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  HealthStatus,
-  HealthCheckResult,
-  HealthCheck,
-} from '../../src/core/health/health_check';
+import { HealthStatus, HealthCheckResult, HealthCheck } from '../../src/core/health/health_check';
 import { HealthService } from '../../src/core/health/health_service';
 
 describe('HealthService', () => {
@@ -49,9 +45,7 @@ describe('HealthService', () => {
 
     it('warn check → overall warn', async () => {
       const service = new HealthService({ version: '1.0.0' });
-      service.addHealthCheck(
-        new FakeCheck('cache', 'warn', 'high latency'),
-      );
+      service.addHealthCheck(new FakeCheck('cache', 'warn', 'high latency'));
 
       const response = await service.evaluate();
 
@@ -123,9 +117,7 @@ describe('HealthService', () => {
       const response = await service.evaluate();
 
       expect(response.checks['database'].responseTime).toBeDefined();
-      expect(response.checks['database'].responseTime!).toBeGreaterThanOrEqual(
-        90,
-      );
+      expect(response.checks['database'].responseTime!).toBeGreaterThanOrEqual(90);
     });
   });
 

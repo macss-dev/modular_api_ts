@@ -32,7 +32,7 @@ curl -X POST http://localhost:8080/api/greetings/hello \
 ```
 
 ```json
-{"message":"Hello, World!"}
+{ "message": "Hello, World!" }
 ```
 
 **Docs** → `http://localhost:8080/docs`  
@@ -83,7 +83,7 @@ async execute() {
 ```
 
 ```json
-{"error": "USER_NOT_FOUND", "message": "User not found"}
+{ "error": "USER_NOT_FOUND", "message": "User not found" }
 ```
 
 ---
@@ -97,7 +97,7 @@ const handler = useCaseTestHandler(HelloWorld.fromJson);
 const response = await handler({ name: 'World' });
 
 console.log(response.statusCode); // 200
-console.log(response.body);       // { message: 'Hello, World!' }
+console.log(response.body); // { message: 'Hello, World!' }
 ```
 
 ---

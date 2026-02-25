@@ -1,9 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  HealthStatus,
-  HealthCheckResult,
-  HealthCheck,
-} from '../../src/core/health/health_check';
+import { HealthStatus, HealthCheckResult, HealthCheck } from '../../src/core/health/health_check';
 
 describe('HealthStatus', () => {
   it('has exactly three values: pass, warn, fail', () => {

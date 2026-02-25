@@ -7,13 +7,21 @@ import { apiRegistry } from '../../src/core/registry';
 // ── Minimal UseCase for integration tests ────────────────────
 
 class PingInput extends Input {
-  toJson() { return {}; }
-  toSchema() { return { type: 'object', properties: {} }; }
+  toJson() {
+    return {};
+  }
+  toSchema() {
+    return { type: 'object', properties: {} };
+  }
 }
 
 class PingOutput extends Output {
-  get statusCode() { return 200; }
-  toJson() { return { pong: true }; }
+  get statusCode() {
+    return 200;
+  }
+  toJson() {
+    return { pong: true };
+  }
   toSchema() {
     return {
       type: 'object',
@@ -35,13 +43,17 @@ class PingUseCase extends UseCase<PingInput, PingOutput> {
     return new PingUseCase(new PingInput());
   }
 
-  validate() { return null; }
+  validate() {
+    return null;
+  }
 
   async execute() {
     this.output = new PingOutput();
   }
 
-  toJson() { return this.output.toJson(); }
+  toJson() {
+    return this.output.toJson();
+  }
 }
 
 // ── Tests ────────────────────────────────────────────────────
@@ -88,10 +100,7 @@ describe('ModularApi metrics integration', () => {
     const srv = await startServer({ metricsEnabled: true });
 
     // Make a request to the usecase endpoint
-    await request(srv)
-      .post('/api/test/ping')
-      .send({})
-      .set('Content-Type', 'application/json');
+    await request(srv).post('/api/test/ping').send({}).set('Content-Type', 'application/json');
 
     // Check metrics
     const res = await request(srv).get('/metrics');

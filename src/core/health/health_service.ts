@@ -4,12 +4,7 @@
 // Mirror of health_service.dart in Dart.
 // ============================================================
 
-import {
-  type HealthStatus,
-  HealthCheck,
-  HealthCheckResult,
-  worstStatus,
-} from './health_check';
+import { type HealthStatus, HealthCheck, HealthCheckResult, worstStatus } from './health_check';
 
 /**
  * Aggregated health response following the IETF Health Check Response Format.
@@ -83,10 +78,7 @@ export class HealthService {
 
   constructor(options: HealthServiceOptions) {
     this.version = options.version;
-    this.releaseId =
-      options.releaseId ??
-      process.env.RELEASE_ID ??
-      `${options.version}-debug`;
+    this.releaseId = options.releaseId ?? process.env.RELEASE_ID ?? `${options.version}-debug`;
   }
 
   /** Register a health check to be evaluated on each call to {@link evaluate}. */
@@ -128,9 +120,7 @@ export class HealthService {
   }
 
   /** Run a single check with timeout and timing. */
-  private async runCheck(
-    check: HealthCheck,
-  ): Promise<[string, HealthCheckResult]> {
+  private async runCheck(check: HealthCheck): Promise<[string, HealthCheckResult]> {
     const start = Date.now();
     try {
       const result = await this.withTimeout(check);

@@ -30,7 +30,7 @@ const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
  * ```
  */
 export function useCaseHandler<I extends Input, O extends Output>(
-  factory: UseCaseFactory<I, O>
+  factory: UseCaseFactory<I, O>,
 ): RequestHandler {
   return async (req: Request, res: Response): Promise<void> => {
     try {
@@ -38,7 +38,7 @@ export function useCaseHandler<I extends Input, O extends Output>(
       const data: Record<string, unknown> =
         req.method.toUpperCase() === 'GET' || req.method.toUpperCase() === 'DELETE'
           ? { ...req.query, ...req.params }
-          : (req.body as Record<string, unknown>) ?? {};
+          : ((req.body as Record<string, unknown>) ?? {});
 
       // 2. Build use case
       const useCase = factory(data);

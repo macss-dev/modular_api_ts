@@ -22,6 +22,7 @@ import {
   ModuleBuilder,
   HealthCheck,
   HealthCheckResult,
+  LogLevel,
 } from '../src/index';
 
 // ─── Module Builder ───────────────────────────────────────────────────────────
@@ -86,6 +87,7 @@ class HelloOutput implements Output {
 class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   readonly input: HelloInput;
   output!: HelloOutput;
+  logger?: import('../src/core/logger/logger').ModularLogger;
 
   constructor(input: HelloInput) {
     this.input = input;
@@ -103,6 +105,7 @@ class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   }
 
   async execute(): Promise<void> {
+    this.logger?.info(`Greeting user: ${this.input.name}`);
     this.output = new HelloOutput(`Hello, ${this.input.name}!`);
   }
 
@@ -129,6 +132,7 @@ const api = new ModularApi({
   title: 'Modular API',
   version: '1.0.0',
   metricsEnabled: true,
+  logLevel: LogLevel.debug,
 });
 
 // Register health checks (optional — /health works without any checks)

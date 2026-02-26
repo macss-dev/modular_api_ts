@@ -3,7 +3,7 @@
 Use-case centric toolkit for building modular APIs with Express.  
 Define `UseCase` classes (input → validate → execute → output), connect them to HTTP routes, and get automatic Swagger/OpenAPI documentation.
 
-> TypeScript port of [modular_api](https://pub.dev/packages/modular_api) (Dart/Shelf)
+> Also available in **Dart**: [modular_api](https://pub.dev/packages/modular_api)
 
 ---
 
@@ -54,6 +54,7 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 - Swagger UI at `/docs` — auto-generated from registered use cases
 - Health check at `GET /health` — [IETF Health Check Response Format](doc/health_check_guide.md)
 - Prometheus metrics at `GET /metrics` — [Prometheus exposition format](doc/metrics_guide.md)
+- Structured JSON logging — Loki/Grafana compatible, [request-scoped with trace_id](doc/logger_guide.md)
 - All endpoints default to `POST` (configurable per use case)
 - Full TypeScript declarations (`.d.ts`) included
 
@@ -62,7 +63,7 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 ## Installation
 
 ```bash
-npm install modular_api
+npm install @macss/modular-api
 ```
 
 ---
@@ -113,17 +114,6 @@ HTTP Request → ModularApi → Module → UseCase → Business Logic → Output
 - **HTTP adapter** — turns a UseCase into an Express RequestHandler
 - **Middlewares** — cross-cutting concerns (CORS, logging)
 - **Swagger UI** — documentation served automatically
-
----
-
-## Dart version
-
-This is the TypeScript port. The original Dart version is available at:
-
-- **pub.dev**: [modular_api](https://pub.dev/packages/modular_api)
-- **GitHub**: [macss-dev/modular_api](https://github.com/macss-dev/modular_api)
-
-Both SDKs share the same architecture and API surface at v0.1.0.
 
 ---
 

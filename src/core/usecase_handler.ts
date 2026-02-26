@@ -7,6 +7,8 @@
 import type { Request, Response, RequestHandler } from 'express';
 import type { UseCaseFactory, Input, Output } from './usecase';
 import { UseCaseException } from './use_case_exception';
+import { LOGGER_LOCALS_KEY } from './logger/logging_middleware';
+import type { ModularLogger } from './logger/logger';
 
 const JSON_HEADERS = { 'Content-Type': 'application/json; charset=utf-8' };
 
@@ -42,6 +44,12 @@ export function useCaseHandler<I extends Input, O extends Output>(
 
       // 2. Build use case
       const useCase = factory(data);
+
+      // 2b. Inject request-scoped logger (if logging middleware is active)
+      const logger = res.locals[LOGGER_LOCALS_KEY] as ModularLogger | undefined;
+      if (logger) {
+        useCase.logger = logger;
+      }
 
       // 3. Validate
       const validationError = useCase.validate();

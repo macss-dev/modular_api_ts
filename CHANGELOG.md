@@ -7,6 +7,26 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Documentation
 
+## [0.3.0] - 2026-02-26
+
+### Added
+
+- **Structured JSON Logger** — request-scoped logging compatible with Loki, Grafana, Elasticsearch, and any JSON log aggregator
+- `LogLevel` enum — 8 RFC 5424 severity levels (emergency..debug) with configurable filtering
+- `ModularLogger` interface — 8 logging methods (one per level) with optional structured `fields` and `traceId` property
+- `RequestScopedLogger` — implementation with injectable `writeFn` for testability
+- `loggingMiddleware()` — Express middleware that creates a per-request logger with unique `trace_id`
+- `trace_id` auto-generated (UUID v4 via `crypto.randomUUID()`) or propagated from `X-Request-ID` header
+- `X-Request-ID` response header set on every response for client-side correlation
+- Logger injected as `UseCase.logger` property — zero breaking change to `execute()` signature
+- Automatic status-to-level mapping: 2xx→info, 4xx→warning, 5xx→error
+- Excluded routes: `/health`, `/metrics`, `/docs`, `/docs/` (no request/response logs)
+- `logLevel` option on `ModularApiOptions` (default: `LogLevel.info`)
+- `useCaseTestHandler` now accepts optional `{ logger }` options parameter
+- Barrel exports: `LogLevel`, `RequestScopedLogger`, `ModularLogger`, `loggingMiddleware`, `LOGGER_LOCALS_KEY`, `LoggingMiddlewareOptions`
+- 51 new tests: logger (26), middleware (19), integration (6)
+- Documentation: `doc/logger_guide.md`
+
 ## [0.2.0] - 2026-02-24
 
 ### Added

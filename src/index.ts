@@ -38,3 +38,9 @@ export { healthHandler } from './core/health/health_handler';
 export { MetricRegistry, MetricsRegistrar } from './core/metrics/metric_registry';
 export { metricsMiddleware, metricsHandler } from './core/metrics/metrics_middleware';
 export type { MetricsMiddlewareOptions } from './core/metrics/metrics_middleware';
+
+// Logger — Structured JSON logging (Loki/Grafana compatible)
+export { LogLevel, RequestScopedLogger } from './core/logger/logger';
+export type { ModularLogger } from './core/logger/logger';
+export { loggingMiddleware, LOGGER_LOCALS_KEY } from './core/logger/logging_middleware';
+export type { LoggingMiddlewareOptions } from './core/logger/logging_middleware';

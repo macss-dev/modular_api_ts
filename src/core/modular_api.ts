@@ -13,6 +13,8 @@ import { HealthService } from './health/health_service';
 import { healthHandler } from './health/health_handler';
 import { MetricRegistry, MetricsRegistrar } from './metrics/metric_registry';
 import { metricsMiddleware, metricsHandler } from './metrics/metrics_middleware';
+import { loggingMiddleware } from './logger/logging_middleware';
+import { LogLevel } from './logger/logger';
 import { apiRegistry } from './registry';
 import type { Counter, Gauge, Histogram } from 'prom-client';
 
@@ -34,6 +36,11 @@ export interface ModularApiOptions {
   metricsPath?: string;
   /** Routes excluded from instrumentation. Default: ['/metrics', '/health', '/docs'] */
   excludedMetricsRoutes?: string[];
+  /**
+   * Minimum log level for the structured JSON logger.
+   * Default: LogLevel.info (emits emergency..info, suppresses debug).
+   */
+  logLevel?: LogLevel;
 }
 
 /**
@@ -75,6 +82,9 @@ export class ModularApi {
   private readonly httpRequestsInFlight?: Gauge;
   private readonly httpRequestDuration?: Histogram<'method' | 'route' | 'status_code'>;
 
+  // Logging
+  private readonly logLevel: LogLevel;
+
   /** Public accessor for custom-metric registration. Undefined when metrics are disabled. */
   get metrics(): MetricsRegistrar | undefined {
     return this._metricsRegistrar;
@@ -93,6 +103,9 @@ export class ModularApi {
     this.metricsEnabled = options.metricsEnabled ?? false;
     this.metricsPath = options.metricsPath ?? '/metrics';
     this.excludedMetricsRoutes = options.excludedMetricsRoutes ?? ['/metrics', '/health', '/docs'];
+
+    // Logging
+    this.logLevel = options.logLevel ?? LogLevel.info;
 
     if (this.metricsEnabled) {
       this.metricRegistry = new MetricRegistry();
@@ -179,7 +192,17 @@ export class ModularApi {
     const { port, host = '0.0.0.0' } = options;
 
     return new Promise((resolve) => {
-      // Metrics middleware FIRST — before user middlewares & routes.
+      // Logging middleware FIRST — trace_id + structured JSON logs.
+      const excludedLogRoutes = ['/health', this.metricsPath, '/docs', '/docs/'];
+      this.app.use(
+        loggingMiddleware({
+          logLevel: this.logLevel,
+          serviceName: this.title,
+          excludedRoutes: excludedLogRoutes,
+        }),
+      );
+
+      // Metrics middleware — before user middlewares & routes.
       // Created here so registeredPaths is populated from apiRegistry.
       if (
         this.metricsEnabled &&

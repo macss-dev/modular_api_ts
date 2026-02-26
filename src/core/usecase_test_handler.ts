@@ -6,6 +6,7 @@
 
 import type { UseCaseFactory, Input, Output } from './usecase';
 import { UseCaseException } from './use_case_exception';
+import type { ModularLogger } from './logger/logger';
 
 export interface TestResponse {
   statusCode: number;
@@ -33,9 +34,15 @@ export interface TestResponse {
 export async function useCaseTestHandler<I extends Input, O extends Output>(
   factory: UseCaseFactory<I, O>,
   input: Record<string, unknown> = {},
+  options?: { logger?: ModularLogger },
 ): Promise<TestResponse> {
   try {
     const useCase = factory(input);
+
+    // Inject logger if provided
+    if (options?.logger) {
+      useCase.logger = options.logger;
+    }
 
     const validationError = useCase.validate();
     if (validationError !== null) {

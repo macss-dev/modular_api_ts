@@ -4,6 +4,8 @@
 // Mirror of the Dart abstract classes in usecase.dart
 // ============================================================
 
+import type { ModularLogger } from './logger/logger';
+
 /**
  * **Contract** — use `implements Input`.
  *
@@ -108,6 +110,13 @@ export abstract class UseCase<I extends Input, O extends Output> {
 
   /** Output DTO — set in execute(). */
   abstract output: O;
+
+  /**
+   * Request-scoped logger injected by the framework's logging middleware.
+   * Available inside `execute()`. Undefined when running without middleware
+   * or in tests that don't provide one.
+   */
+  logger?: ModularLogger;
 
   /**
    * Synchronous validation.

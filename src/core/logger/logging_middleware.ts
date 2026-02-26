@@ -46,9 +46,7 @@ export function loggingMiddleware(opts: LoggingMiddlewareOptions): RequestHandle
     // 1. Resolve trace_id
     const headerValue = req.headers['x-request-id'];
     const traceId =
-      typeof headerValue === 'string' && headerValue.length > 0
-        ? headerValue
-        : randomUUID();
+      typeof headerValue === 'string' && headerValue.length > 0 ? headerValue : randomUUID();
 
     // 2. Create per-request logger
     const logger = new RequestScopedLogger(traceId, opts.logLevel, opts.serviceName, opts.writeFn);

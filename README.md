@@ -54,6 +54,7 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 - Swagger UI at `/docs` — auto-generated from registered use cases
 - Health check at `GET /health` — [IETF Health Check Response Format](doc/health_check_guide.md)
 - Prometheus metrics at `GET /metrics` — [Prometheus exposition format](doc/metrics_guide.md)
+- Structured JSON logging — Loki/Grafana compatible, [request-scoped with trace_id](doc/logger_guide.md)
 - All endpoints default to `POST` (configurable per use case)
 - Full TypeScript declarations (`.d.ts`) included
 
@@ -123,7 +124,7 @@ This is the TypeScript port. The original Dart version is available at:
 - **pub.dev**: [modular_api](https://pub.dev/packages/modular_api)
 - **GitHub**: [macss-dev/modular_api](https://github.com/macss-dev/modular_api)
 
-Both SDKs share the same architecture and API surface at v0.1.0.
+Both SDKs share the same architecture and API surface at v0.3.0.
 
 ---
 

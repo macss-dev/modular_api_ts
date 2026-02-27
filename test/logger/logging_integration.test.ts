@@ -29,7 +29,6 @@ class PingOutput implements Output {
 
 class PingUseCase extends UseCase<PingInput, PingOutput> {
   readonly input: PingInput;
-  output!: PingOutput;
 
   constructor(input: PingInput) {
     super();
@@ -45,11 +44,7 @@ class PingUseCase extends UseCase<PingInput, PingOutput> {
   }
 
   async execute() {
-    this.output = new PingOutput();
-  }
-
-  toJson() {
-    return this.output.toJson();
+    return new PingOutput();
   }
 }
 
@@ -57,7 +52,6 @@ class PingUseCase extends UseCase<PingInput, PingOutput> {
 
 class LoggingUseCase extends UseCase<PingInput, PingOutput> {
   readonly input: PingInput;
-  output!: PingOutput;
 
   constructor(input: PingInput) {
     super();
@@ -74,11 +68,7 @@ class LoggingUseCase extends UseCase<PingInput, PingOutput> {
 
   async execute() {
     this.logger?.info('executing inside use case', { custom: 'field' });
-    this.output = new PingOutput();
-  }
-
-  toJson() {
-    return this.output.toJson();
+    return new PingOutput();
   }
 }
 

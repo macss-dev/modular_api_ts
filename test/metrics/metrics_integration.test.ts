@@ -32,7 +32,6 @@ class PingOutput extends Output {
 
 class PingUseCase extends UseCase<PingInput, PingOutput> {
   readonly input: PingInput;
-  output!: PingOutput;
 
   constructor(input: PingInput) {
     super();
@@ -48,11 +47,7 @@ class PingUseCase extends UseCase<PingInput, PingOutput> {
   }
 
   async execute() {
-    this.output = new PingOutput();
-  }
-
-  toJson() {
-    return this.output.toJson();
+    return new PingOutput();
   }
 }
 

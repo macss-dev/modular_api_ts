@@ -52,11 +52,11 @@ export async function useCaseTestHandler<I extends Input, O extends Output>(
       };
     }
 
-    await useCase.execute();
+    const output = await useCase.execute();
 
     return {
-      statusCode: useCase.output.statusCode,
-      body: useCase.toJson(),
+      statusCode: output.statusCode,
+      body: output.toJson(),
     };
   } catch (err) {
     if (err instanceof UseCaseException) {

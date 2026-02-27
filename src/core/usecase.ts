@@ -77,13 +77,12 @@ export type UseCaseFactory<I extends Input = Input, O extends Output = Output> =
  * Lifecycle (handled by the framework):
  *   1. `fromJson(json)`    — static factory, builds the use case
  *   2. `validate()`        — return error string or null
- *   3. `execute()`         — run business logic, set `this.output`
- *   4. `output.toJson()`   — serialize and return to HTTP client
+ *   3. `execute()`         — run business logic, return the Output
+ *   4. `output.toJson()`   — called by the framework on the returned output
  *
  * ```ts
  * class SayHello implements UseCase<HelloInput, HelloOutput> {
  *   input: HelloInput;
- *   output!: HelloOutput;
  *
  *   constructor(input: HelloInput) { this.input = input; }
  *
@@ -96,20 +95,15 @@ export type UseCaseFactory<I extends Input = Input, O extends Output = Output> =
  *     return null;
  *   }
  *
- *   async execute(): Promise<void> {
- *     this.output = new HelloOutput(`Hello, ${this.input.name}!`);
+ *   async execute(): Promise<HelloOutput> {
+ *     return new HelloOutput(`Hello, ${this.input.name}!`);
  *   }
- *
- *   toJson() { return this.output.toJson(); }
  * }
  * ```
  */
 export abstract class UseCase<I extends Input, O extends Output> {
   /** Input DTO — set in constructor. */
   abstract readonly input: I;
-
-  /** Output DTO — set in execute(). */
-  abstract output: O;
 
   /**
    * Request-scoped logger injected by the framework's logging middleware.
@@ -126,14 +120,8 @@ export abstract class UseCase<I extends Input, O extends Output> {
   abstract validate(): string | null;
 
   /**
-   * Business logic. Must set `this.output` before returning.
+   * Business logic. Returns the Output DTO directly.
    * Keep this method free of HTTP concerns.
    */
-  abstract execute(): Promise<void>;
-
-  /**
-   * Serializes the output DTO to a plain object for the HTTP response.
-   * Typically implemented as `return this.output.toJson();`
-   */
-  abstract toJson(): Record<string, unknown>;
+  abstract execute(): Promise<O>;
 }

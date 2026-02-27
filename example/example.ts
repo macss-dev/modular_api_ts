@@ -86,7 +86,6 @@ class HelloOutput implements Output {
 
 class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   readonly input: HelloInput;
-  output!: HelloOutput;
   logger?: import('../src/core/logger/logger').ModularLogger;
 
   constructor(input: HelloInput) {
@@ -104,13 +103,9 @@ class HelloWorld implements UseCase<HelloInput, HelloOutput> {
     return null;
   }
 
-  async execute(): Promise<void> {
+  async execute(): Promise<HelloOutput> {
     this.logger?.info(`Greeting user: ${this.input.name}`);
-    this.output = new HelloOutput(`Hello, ${this.input.name}!`);
-  }
-
-  toJson(): Record<string, unknown> {
-    return this.output.toJson();
+    return new HelloOutput(`Hello, ${this.input.name}!`);
   }
 }
 

@@ -19,10 +19,6 @@ export type { ModularApiOptions } from './core/modular_api';
 export { ModuleBuilder } from './core/module_builder';
 export type { UseCaseOptions } from './core/module_builder';
 
-// Test helper — use in unit tests without an HTTP server
-export { useCaseTestHandler } from './core/usecase_test_handler';
-export type { TestResponse } from './core/usecase_test_handler';
-
 // Middlewares
 export { cors } from './middlewares/cors';
 export type { CorsOptions } from './middlewares/cors';

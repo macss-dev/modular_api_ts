@@ -49,7 +49,7 @@ See `example/example.ts` for the full implementation including Input, Output, Us
 - `Output.statusCode` — custom HTTP status codes per response
 - `UseCaseException` — structured error handling (status code, message, error code, details)
 - `ModularApi` + `ModuleBuilder` — module registration and routing
-- `useCaseTestHandler` — unit test helper (no HTTP server needed)
+- Constructor-based unit testing with fake dependency injection
 - `cors()` middleware — built-in CORS support
 - Swagger UI at `/docs` — auto-generated from registered use cases
 - Health check at `GET /health` — [IETF Health Check Response Format](doc/health_check_guide.md)
@@ -92,15 +92,80 @@ async execute() {
 
 ## Testing
 
+Write true unit tests by injecting fake dependencies directly through the constructor.
+No HTTP server or real infrastructure needed.
+
 ```ts
-import { useCaseTestHandler } from 'modular_api';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { UseCaseException } from 'modular_api';
 
-const handler = useCaseTestHandler(HelloWorld.fromJson);
-const response = await handler({ name: 'World' });
+// ─── Fake ────────────────────────────────────────────────────
+class FakeGreetingRepository implements GreetingRepository {
+  saved: string[] = [];
 
-console.log(response.statusCode); // 200
-console.log(response.body); // { message: 'Hello, World!' }
+  async save(name: string): Promise<void> {
+    this.saved.push(name);
+  }
+}
+
+// ─── Tests ───────────────────────────────────────────────────
+describe('SayHello', () => {
+  let fakeRepo: FakeGreetingRepository;
+
+  beforeEach(() => {
+    fakeRepo = new FakeGreetingRepository();
+  });
+
+  it('greets correctly', async () => {
+    const usecase = new SayHello(
+      new SayHelloInput('World'),
+      { repository: fakeRepo },
+    );
+
+    expect(usecase.validate()).toBeNull();
+
+    const output = await usecase.execute();
+
+    expect(output.message).toBe('Hello, World!');
+    expect(fakeRepo.saved).toContain('World');
+  });
+
+  it('rejects empty name', () => {
+    const usecase = new SayHello(
+      new SayHelloInput(''),
+      { repository: fakeRepo },
+    );
+
+    expect(usecase.validate()).not.toBeNull();
+  });
+
+  it('throws UseCaseException when repo fails', async () => {
+    const failingRepo = {
+      save: async () => { throw new Error('DB error'); },
+    };
+
+    const usecase = new SayHello(
+      new SayHelloInput('World'),
+      { repository: failingRepo },
+    );
+
+    await expect(usecase.execute()).rejects.toThrow(UseCaseException);
+  });
+});
 ```
+
+For integration tests against real infrastructure, use `UseCase.fromJson()` directly
+(no helper wrapper needed):
+
+```ts
+it('integration — end to end with real DB', async () => {
+  const usecase = SayHello.fromJson({ name: 'World' });
+  await usecase.execute();
+  expect(usecase.output.message).toBe('Hello, World!');
+});
+```
+
+See [doc/testing_guide.md](doc/testing_guide.md) for the full guide.
 
 ---
 

@@ -29,16 +29,16 @@ Every request now produces structured JSON logs to stdout:
 
 ## Log levels (RFC 5424)
 
-| Level | Value | When emitted |
-|-------|-------|--------------|
-| `emergency` | 0 | System unusable |
-| `alert` | 1 | Immediate action required |
-| `critical` | 2 | Critical condition |
-| `error` | 3 | Operation errors, 5xx responses |
-| `warning` | 4 | Abnormal conditions, 4xx responses |
-| `notice` | 5 | Normal but significant |
-| `info` | 6 | Normal flow, 2xx/3xx responses |
-| `debug` | 7 | Detailed diagnostics |
+| Level       | Value | When emitted                       |
+| ----------- | ----- | ---------------------------------- |
+| `emergency` | 0     | System unusable                    |
+| `alert`     | 1     | Immediate action required          |
+| `critical`  | 2     | Critical condition                 |
+| `error`     | 3     | Operation errors, 5xx responses    |
+| `warning`   | 4     | Abnormal conditions, 4xx responses |
+| `notice`    | 5     | Normal but significant             |
+| `info`      | 6     | Normal flow, 2xx/3xx responses     |
+| `debug`     | 7     | Detailed diagnostics               |
 
 **Filtering rule:** A message is emitted if `level.value <= logLevel.value`.
 
@@ -64,22 +64,26 @@ class CreateUser extends UseCase<CreateUserInput, CreateUserOutput> {
     return new CreateUser(CreateUserInput.fromJson(json));
   }
 
-  validate() { return null; }
+  validate() {
+    return null;
+  }
 
   async execute(): Promise<void> {
     this.logger?.info(`Creating user: ${this.input.email}`);
-    
+
     // ... business logic ...
-    
+
     this.logger?.debug('User created successfully', {
       userId: newUser.id,
       email: this.input.email,
     });
-    
+
     this.output = new CreateUserOutput(newUser.id);
   }
 
-  toJson() { return this.output.toJson(); }
+  toJson() {
+    return this.output.toJson();
+  }
 }
 ```
 
@@ -128,19 +132,19 @@ All logs within the same request share the same `trace_id`, enabling end-to-end 
 
 Each log is a single JSON line written to stdout:
 
-| Field | Type | Always present | Description |
-|-------|------|----------------|-------------|
-| `ts` | `number` | Yes | Unix timestamp (seconds.milliseconds) |
-| `level` | `string` | Yes | Level name (lowercase) |
-| `severity` | `number` | Yes | RFC 5424 numeric value |
-| `msg` | `string` | Yes | Log message |
-| `service` | `string` | Yes | Service name (from `title`) |
-| `trace_id` | `string` | Yes | Request correlation ID |
-| `method` | `string` | Request/Response logs | HTTP method |
-| `route` | `string` | Request/Response logs | Request path |
-| `status` | `number` | Response logs | HTTP status code |
-| `duration_ms` | `number` | Response logs | Request duration in ms |
-| `fields` | `object` | When provided | Custom structured data |
+| Field         | Type     | Always present        | Description                           |
+| ------------- | -------- | --------------------- | ------------------------------------- |
+| `ts`          | `number` | Yes                   | Unix timestamp (seconds.milliseconds) |
+| `level`       | `string` | Yes                   | Level name (lowercase)                |
+| `severity`    | `number` | Yes                   | RFC 5424 numeric value                |
+| `msg`         | `string` | Yes                   | Log message                           |
+| `service`     | `string` | Yes                   | Service name (from `title`)           |
+| `trace_id`    | `string` | Yes                   | Request correlation ID                |
+| `method`      | `string` | Request/Response logs | HTTP method                           |
+| `route`       | `string` | Request/Response logs | Request path                          |
+| `status`      | `number` | Response logs         | HTTP status code                      |
+| `duration_ms` | `number` | Response logs         | Request duration in ms                |
+| `fields`      | `object` | When provided         | Custom structured data                |
 
 ---
 
@@ -159,13 +163,13 @@ These routes are excluded from logging by default (no request/response logs emit
 
 Response logs automatically use the appropriate level:
 
-| Status range | Level |
-|-------------|-------|
-| 1xx | `notice` |
-| 2xx | `info` |
-| 3xx | `info` |
-| 4xx | `warning` |
-| 5xx | `error` |
+| Status range | Level     |
+| ------------ | --------- |
+| 1xx          | `notice`  |
+| 2xx          | `info`    |
+| 3xx          | `info`    |
+| 4xx          | `warning` |
+| 5xx          | `error`   |
 
 ---
 
@@ -184,15 +188,11 @@ const logger = new RequestScopedLogger({
   writeFn: (line) => lines.push(line),
 });
 
-const response = await useCaseTestHandler(
-  MyUseCase.fromJson,
-  { name: 'World' },
-  { logger },
-);
+const response = await useCaseTestHandler(MyUseCase.fromJson, { name: 'World' }, { logger });
 
 expect(response.statusCode).toBe(200);
 // Verify logs were emitted
-expect(lines.some(l => l.includes('test-trace'))).toBe(true);
+expect(lines.some((l) => l.includes('test-trace'))).toBe(true);
 ```
 
 ---
@@ -209,7 +209,7 @@ Since logs are single-line JSON to stdout, any container orchestrator (Docker, K
 
 ## Configuration reference
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `logLevel` | `LogLevel` | `LogLevel.info` | Minimum severity to emit |
-| `title` | `string` | `'Modular API'` | Used as `service` field in logs |
+| Parameter  | Type       | Default         | Description                     |
+| ---------- | ---------- | --------------- | ------------------------------- |
+| `logLevel` | `LogLevel` | `LogLevel.info` | Minimum severity to emit        |
+| `title`    | `string`   | `'Modular API'` | Used as `service` field in logs |

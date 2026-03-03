@@ -42,4 +42,9 @@ export { loggingMiddleware, LOGGER_LOCALS_KEY } from './core/logger/logging_midd
 export type { LoggingMiddlewareOptions } from './core/logger/logging_middleware';
 
 // OpenAPI — Raw spec endpoints
-export { buildOpenApiSpec, jsonToYaml, openApiJsonHandler, openApiYamlHandler } from './openapi/openapi';
+export {
+  buildOpenApiSpec,
+  jsonToYaml,
+  openApiJsonHandler,
+  openApiYamlHandler,
+} from './openapi/openapi';

@@ -121,9 +121,7 @@ function _schemaToQueryParams(schema: Record<string, unknown>): unknown[] {
 // ============================================================
 
 /** YAML reserved words that need quoting */
-const YAML_RESERVED = new Set([
-  'true', 'false', 'null', 'yes', 'no', 'on', 'off', 'y', 'n',
-]);
+const YAML_RESERVED = new Set(['true', 'false', 'null', 'yes', 'no', 'on', 'off', 'y', 'n']);
 
 /** Characters that require quoting in a YAML string value */
 const YAML_SPECIAL_RE = /[:{}\[\],&*?|>!%#@`"\\]/;

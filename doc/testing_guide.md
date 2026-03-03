@@ -47,10 +47,7 @@ describe('CalcularImc', () => {
 
   it('calcula IMC correctamente', async () => {
     // ✅ Inject fake directly through the constructor
-    const usecase = new CalcularImc(
-      new CalcularImcInput(70.0, 1.75),
-      { repository: fakeRepo },
-    );
+    const usecase = new CalcularImc(new CalcularImcInput(70.0, 1.75), { repository: fakeRepo });
 
     expect(usecase.validate()).toBeNull();
 
@@ -63,19 +60,15 @@ describe('CalcularImc', () => {
   });
 
   it('rechaza peso negativo', () => {
-    const usecase = new CalcularImc(
-      new CalcularImcInput(-5.0, 1.75),
-      { repository: fakeRepo },
-    );
+    const usecase = new CalcularImc(new CalcularImcInput(-5.0, 1.75), { repository: fakeRepo });
 
     expect(usecase.validate()).toContain('positivo');
   });
 
   it('lanza UseCaseException cuando el repo falla', async () => {
-    const usecase = new CalcularImc(
-      new CalcularImcInput(70.0, 1.75),
-      { repository: new FakeFailingRepo() },
-    );
+    const usecase = new CalcularImc(new CalcularImcInput(70.0, 1.75), {
+      repository: new FakeFailingRepo(),
+    });
 
     await expect(usecase.execute()).rejects.toThrow(UseCaseException);
   });
@@ -84,13 +77,13 @@ describe('CalcularImc', () => {
 
 ### Why constructor injection?
 
-| Concern | Constructor (unit) | `fromJson` (integration) |
-|---------|-------------------|--------------------------|
-| Speed | Milliseconds | Seconds (network I/O) |
-| Reliability | Always green | Depends on infra |
-| Isolation | Pure business logic | End-to-end |
-| Fake support | ✅ Full control | ❌ Uses prod adapters |
-| State inspection | ✅ Query fake state | ❌ Not possible |
+| Concern          | Constructor (unit)  | `fromJson` (integration) |
+| ---------------- | ------------------- | ------------------------ |
+| Speed            | Milliseconds        | Seconds (network I/O)    |
+| Reliability      | Always green        | Depends on infra         |
+| Isolation        | Pure business logic | End-to-end               |
+| Fake support     | ✅ Full control     | ❌ Uses prod adapters    |
+| State inspection | ✅ Query fake state | ❌ Not possible          |
 
 ---
 
@@ -119,7 +112,7 @@ it('integration — persists to real DB', async () => {
 
 ## Summary
 
-| Test type | When to use | How |
-|-----------|-------------|-----|
-| **Unit** | Default — always | `new MyUseCase(input, { repository: fakeRepo })` |
-| **Integration** | Verify real infra wiring | `MyUseCase.fromJson(json)` directly |
+| Test type       | When to use              | How                                              |
+| --------------- | ------------------------ | ------------------------------------------------ |
+| **Unit**        | Default — always         | `new MyUseCase(input, { repository: fakeRepo })` |
+| **Integration** | Verify real infra wiring | `MyUseCase.fromJson(json)` directly              |

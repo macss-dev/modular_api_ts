@@ -37,8 +37,8 @@ curl -X POST http://localhost:8080/api/greetings/hello \
 
 **Docs** → `http://localhost:8080/docs`  
 **Health** → `http://localhost:8080/health`  
-**OpenAPI JSON** → `http://localhost:8080/openapi.json` *(also /openapi.yaml)* 
-**Metrics** → `http://localhost:8080/metrics` *(opt-in)*
+**OpenAPI JSON** → `http://localhost:8080/openapi.json` _(also /openapi.yaml)_
+**Metrics** → `http://localhost:8080/metrics` _(opt-in)_
 
 See `example/example.ts` for the full implementation including Input, Output, UseCase with `validate()`, and the builder.
 
@@ -120,10 +120,7 @@ describe('SayHello', () => {
   });
 
   it('greets correctly', async () => {
-    const usecase = new SayHello(
-      new SayHelloInput('World'),
-      { repository: fakeRepo },
-    );
+    const usecase = new SayHello(new SayHelloInput('World'), { repository: fakeRepo });
 
     expect(usecase.validate()).toBeNull();
 
@@ -134,23 +131,19 @@ describe('SayHello', () => {
   });
 
   it('rejects empty name', () => {
-    const usecase = new SayHello(
-      new SayHelloInput(''),
-      { repository: fakeRepo },
-    );
+    const usecase = new SayHello(new SayHelloInput(''), { repository: fakeRepo });
 
     expect(usecase.validate()).not.toBeNull();
   });
 
   it('throws UseCaseException when repo fails', async () => {
     const failingRepo = {
-      save: async () => { throw new Error('DB error'); },
+      save: async () => {
+        throw new Error('DB error');
+      },
     };
 
-    const usecase = new SayHello(
-      new SayHelloInput('World'),
-      { repository: failingRepo },
-    );
+    const usecase = new SayHello(new SayHelloInput('World'), { repository: failingRepo });
 
     await expect(usecase.execute()).rejects.toThrow(UseCaseException);
   });

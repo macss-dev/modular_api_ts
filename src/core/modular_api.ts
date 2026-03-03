@@ -6,7 +6,7 @@
 
 import express, { type Express, type RequestHandler, type Router } from 'express';
 import { ModuleBuilder } from './module_builder';
-import { buildOpenApiSpec } from '../openapi/openapi';
+import { buildOpenApiSpec, openApiJsonHandler, openApiYamlHandler } from '../openapi/openapi';
 import swaggerUi from 'swagger-ui-express';
 import type { HealthCheck } from './health/health_check';
 import { HealthService } from './health/health_service';
@@ -242,9 +242,15 @@ export class ModularApi {
       const spec = buildOpenApiSpec({ title: this.title, port });
       this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
 
+      // Raw spec endpoints
+      this.app.get('/openapi.json', openApiJsonHandler(spec));
+      this.app.get('/openapi.yaml', openApiYamlHandler(spec));
+
       const server = this.app.listen(port, host, () => {
         console.log(`Docs  → http://localhost:${port}/docs`);
         console.log(`Health → http://localhost:${port}/health`);
+        console.log(`OpenAPI JSON → http://localhost:${port}/openapi.json`);
+        console.log(`OpenAPI YAML → http://localhost:${port}/openapi.yaml`);
         if (this.metricsEnabled) {
           console.log(`Metrics → http://localhost:${port}${this.metricsPath}`);
         }

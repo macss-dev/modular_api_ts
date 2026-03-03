@@ -7,6 +7,29 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Documentation
 
+## [0.4.0] - 2026-03-03
+
+### Removed
+
+- **BREAKING:** `useCaseTestHandler` — removed from public API and deleted `src/core/usecase_test_handler.ts`
+  - Testing now uses direct constructor injection: instantiate the UseCase with its Input, call `validate()`, `execute()`, and assert on `output` directly
+  - Barrel exports removed from `src/index.ts` (`useCaseTestHandler`, `TestResponse`)
+
+### Added
+
+- **`GET /openapi.json`** — returns the full OpenAPI 3.0 specification as `application/json`
+- **`GET /openapi.yaml`** — returns the full OpenAPI 3.0 specification as `application/x-yaml`
+- `openApiJsonHandler()` / `openApiYamlHandler()` — Express handlers for raw spec access
+- `jsonToYaml()` — zero-dependency JSON-to-YAML converter
+- Spec is cached at startup alongside Swagger UI (no per-request rebuild)
+- Barrel exports: `buildOpenApiSpec`, `jsonToYaml`, `openApiJsonHandler`, `openApiYamlHandler`
+- 18 new tests: jsonToYaml unit (8), /openapi.json integration (4), /openapi.yaml integration (5), consistency (1)
+
+### Changed
+
+- Added comprehensive testing guide (`doc/testing_guide.md`) documenting the constructor-injection approach
+- Updated `README.md` examples to reflect the new testing pattern
+
 ## [0.3.0] - 2026-02-26
 
 ### Added

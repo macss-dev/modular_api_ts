@@ -5,6 +5,7 @@
 // ============================================================
 
 import { apiRegistry } from '../core/registry';
+import type { RequestHandler } from 'express';
 
 interface OpenApiOptions {
   title: string;
@@ -113,4 +114,136 @@ function _schemaToQueryParams(schema: Record<string, unknown>): unknown[] {
     required: required.includes(name),
     schema: propSchema,
   }));
+}
+
+// ============================================================
+// JSON-to-YAML converter (zero dependencies)
+// ============================================================
+
+/** YAML reserved words that need quoting */
+const YAML_RESERVED = new Set([
+  'true', 'false', 'null', 'yes', 'no', 'on', 'off', 'y', 'n',
+]);
+
+/** Characters that require quoting in a YAML string value */
+const YAML_SPECIAL_RE = /[:{}\[\],&*?|>!%#@`"\\]/;
+
+/**
+ * Determines if a string needs quoting in YAML.
+ */
+function needsQuoting(s: string): boolean {
+  if (s.length === 0) return true;
+  if (YAML_RESERVED.has(s.toLowerCase())) return true;
+  if (YAML_SPECIAL_RE.test(s)) return true;
+  if (/^[-? ]/.test(s)) return true;
+  if (!isNaN(Number(s)) && s.trim().length > 0) return true;
+  if (s.includes('\n')) return true;
+  return false;
+}
+
+/** Formats a YAML key, quoting if necessary. */
+function yamlKey(key: string): string {
+  if (needsQuoting(key)) return `'${key.replace(/'/g, "''")}'`;
+  return key;
+}
+
+/** Writes a scalar YAML value. */
+function yamlScalar(value: unknown): string {
+  if (value === null || value === undefined) return 'null';
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (typeof value === 'number') return String(value);
+  const s = String(value);
+  if (needsQuoting(s)) return `'${s.replace(/'/g, "''")}'`;
+  return s;
+}
+
+/**
+ * Converts a JSON-decoded value to a YAML string.
+ * Zero dependencies — handles objects, arrays, strings, numbers, bools, null.
+ */
+export function jsonToYaml(value: unknown, indent = 0, isRoot = true): string {
+  const pad = '  '.repeat(indent);
+
+  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+    const keys = Object.keys(obj);
+    if (keys.length === 0) return '{}\n';
+
+    let result = isRoot ? '' : '\n';
+    for (const key of keys) {
+      const v = obj[key];
+      if (v !== null && typeof v === 'object') {
+        result += `${pad}${yamlKey(key)}:${jsonToYaml(v, indent + 1, false)}`;
+      } else {
+        result += `${pad}${yamlKey(key)}: ${yamlScalar(v)}\n`;
+      }
+    }
+    return result;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]\n';
+
+    let result = isRoot ? '' : '\n';
+    for (const item of value) {
+      if (item !== null && typeof item === 'object' && !Array.isArray(item)) {
+        const entries = Object.entries(item as Record<string, unknown>);
+        if (entries.length > 0) {
+          let first = true;
+          for (const [k, v] of entries) {
+            if (first) {
+              result += `${pad}- ${yamlKey(k)}:`;
+              first = false;
+            } else {
+              result += `${pad}  ${yamlKey(k)}:`;
+            }
+            if (v !== null && typeof v === 'object') {
+              result += jsonToYaml(v, indent + 2, false);
+            } else {
+              result += ` ${yamlScalar(v)}\n`;
+            }
+          }
+        } else {
+          result += `${pad}- {}\n`;
+        }
+      } else if (Array.isArray(item)) {
+        result += `${pad}- ${jsonToYaml(item, indent + 1, false)}`;
+      } else {
+        result += `${pad}- ${yamlScalar(item)}\n`;
+      }
+    }
+    return result;
+  }
+
+  return `${yamlScalar(value)}\n`;
+}
+
+// ============================================================
+// Express handlers for /openapi.json and /openapi.yaml
+// ============================================================
+
+/**
+ * Creates an Express handler that returns the OpenAPI spec as JSON.
+ *
+ * @param spec — the pre-built OpenAPI specification object
+ */
+export function openApiJsonHandler(spec: Record<string, unknown>): RequestHandler {
+  const json = JSON.stringify(spec, null, 2);
+  return (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(json);
+  };
+}
+
+/**
+ * Creates an Express handler that returns the OpenAPI spec as YAML.
+ *
+ * @param spec — the pre-built OpenAPI specification object
+ */
+export function openApiYamlHandler(spec: Record<string, unknown>): RequestHandler {
+  const yaml = jsonToYaml(spec);
+  return (_req, res) => {
+    res.setHeader('Content-Type', 'application/x-yaml');
+    res.send(yaml);
+  };
 }

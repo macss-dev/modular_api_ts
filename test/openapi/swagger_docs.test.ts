@@ -79,4 +79,24 @@ describe('GET /docs — Swagger UI (PRD-003)', () => {
     expect(res.text).toContain('<!DOCTYPE html>');
     expect(res.text).toContain('</html>');
   });
+
+  // ── PRD-004: System-aware dark mode ──────────────────────────
+
+  it('contains prefers-color-scheme media query (PRD-004)', async () => {
+    await startServer();
+    const res = await request(server).get('/docs');
+    expect(res.text).toContain('prefers-color-scheme: dark');
+  });
+
+  it('contains CSS custom properties for theming (PRD-004)', async () => {
+    await startServer();
+    const res = await request(server).get('/docs');
+    expect(res.text).toContain('--bg-primary');
+  });
+
+  it('preserves HTTP method accent colors in dark mode (PRD-004)', async () => {
+    await startServer();
+    const res = await request(server).get('/docs');
+    expect(res.text).toContain('#49cc90');
+  });
 });

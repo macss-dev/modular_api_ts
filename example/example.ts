@@ -86,11 +86,12 @@ class HelloOutput implements Output {
 
 class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   readonly input: HelloInput;
-  output!: HelloOutput;
+  output: HelloOutput;
   logger?: import('../src/core/logger/logger').ModularLogger;
 
   constructor(input: HelloInput) {
     this.input = input;
+    this.output = new HelloOutput('');
   }
 
   static fromJson(json: Record<string, unknown>): HelloWorld {

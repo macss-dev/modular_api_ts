@@ -94,19 +94,39 @@ export class ModuleBuilder {
     return this;
   }
 
-  /** Try to get schemas from a dummy factory call. Fails gracefully. */
+  /**
+   * Capture Input and Output schemas independently from a dummy factory call.
+   *
+   * Each DTO extraction has its own try/catch so a failure in one
+   * (e.g. Output not yet initialised) does not destroy the other.
+   * Matches Dart's separate _inferInputSchema/_inferOutputSchema pattern.
+   */
   private _extractSchemas<I extends Input, O extends Output>(
     factory: UseCaseFactory<I, O>,
   ): { input: Record<string, unknown>; output: Record<string, unknown> } {
+    let instance: UseCase<I, O>;
     try {
-      const instance = factory({});
-      return {
-        input: instance.input.toSchema(),
-        output: instance.output?.toSchema?.() ?? {},
-      };
+      instance = factory({});
     } catch {
+      // Factory itself failed — both schemas fall back to empty.
       return { input: {}, output: {} };
     }
+
+    let input: Record<string, unknown> = {};
+    try {
+      input = instance.input.toSchema();
+    } catch {
+      // Input DTO inaccessible or toSchema() failed — keep empty fallback.
+    }
+
+    let output: Record<string, unknown> = {};
+    try {
+      output = instance.output.toSchema();
+    } catch {
+      // Output not initialised until execute() — expected for most UseCases.
+    }
+
+    return { input, output };
   }
 
   /** @internal — called by ModularApi after the builder callback runs */

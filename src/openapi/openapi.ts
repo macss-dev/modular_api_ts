@@ -37,14 +37,17 @@ export function buildOpenApiSpec(options: OpenApiOptions): Record<string, unknow
   const defaultServers = [{ url: `http://localhost:${port}`, description: 'Local' }];
 
   const paths: Record<string, unknown> = {};
+  const componentSchemas: Record<string, unknown> = {};
 
   for (const route of apiRegistry.routes) {
     const method = route.method.toLowerCase();
     const path = route.path;
 
-    // Use schemas captured at registration time
-    const inputSchema = route.schemas.input;
-    const outputSchema = route.schemas.output;
+    // Store named schemas in components for Swagger UI "Schemas" section
+    const inputRefName = `${route.module}_${route.name}_Input`;
+    const outputRefName = `${route.module}_${route.name}_Output`;
+    componentSchemas[inputRefName] = route.schemas.input;
+    componentSchemas[outputRefName] = route.schemas.output;
 
     if (!paths[path]) {
       paths[path] = {};
@@ -60,20 +63,20 @@ export function buildOpenApiSpec(options: OpenApiOptions): Record<string, unknow
               required: true,
               content: {
                 'application/json': {
-                  schema: inputSchema,
+                  schema: { $ref: `#/components/schemas/${inputRefName}` },
                 },
               },
             },
           }
         : {
-            parameters: _schemaToQueryParams(inputSchema),
+            parameters: _schemaToQueryParams(route.schemas.input),
           }),
       responses: {
         '200': {
           description: 'Successful response',
           content: {
             'application/json': {
-              schema: outputSchema,
+              schema: { $ref: `#/components/schemas/${outputRefName}` },
             },
           },
         },
@@ -100,6 +103,7 @@ export function buildOpenApiSpec(options: OpenApiOptions): Record<string, unknow
     info: { title, version, description },
     servers: servers ?? defaultServers,
     paths,
+    components: { schemas: componentSchemas },
   };
 }
 

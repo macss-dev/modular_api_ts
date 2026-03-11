@@ -1,4 +1,4 @@
-# modular_api
+# modular-api
 
 Use-case centric toolkit for building modular APIs with Express.  
 Define `UseCase` classes (input → validate → execute → output), connect them to HTTP routes, and get automatic Swagger/OpenAPI documentation.
@@ -10,7 +10,7 @@ Define `UseCase` classes (input → validate → execute → output), connect th
 ## Quick start
 
 ```ts
-import { ModularApi, ModuleBuilder } from 'modular_api';
+import { ModularApi, ModuleBuilder } from '@macss/modular-api';
 
 // ─── Module builder (separate file in real projects) ──────────
 function buildGreetingsModule(m: ModuleBuilder): void {
@@ -37,7 +37,7 @@ curl -X POST http://localhost:8080/api/greetings/hello \
 
 **Docs** → `http://localhost:8080/docs`  
 **Health** → `http://localhost:8080/health`  
-**OpenAPI JSON** → `http://localhost:8080/openapi.json` _(also /openapi.yaml)_
+**OpenAPI JSON** → `http://localhost:8080/openapi.json` _(also /openapi.yaml)_  
 **Metrics** → `http://localhost:8080/metrics` _(opt-in)_
 
 See `example/example.ts` for the full implementation including Input, Output, UseCase with `validate()`, and the builder.
@@ -100,7 +100,7 @@ No HTTP server or real infrastructure needed.
 
 ```ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { UseCaseException } from 'modular_api';
+import { UseCaseException } from '@macss/modular-api';
 
 // ─── Fake ────────────────────────────────────────────────────
 class FakeGreetingRepository implements GreetingRepository {

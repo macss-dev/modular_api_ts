@@ -16,7 +16,7 @@ import { metricsMiddleware, metricsHandler } from './metrics/metrics_middleware'
 import { loggingMiddleware } from './logger/logging_middleware';
 import { LogLevel } from './logger/logger';
 import { apiRegistry } from './registry';
-import type { Counter, Gauge, Histogram } from 'prom-client';
+import type { Counter, Gauge, Histogram } from './metrics/metric';
 
 export interface ModularApiOptions {
   /** Base path prefix for all module routes. Default: '/api' */
@@ -78,9 +78,9 @@ export class ModularApi {
   private readonly excludedMetricsRoutes: string[];
   private readonly metricRegistry?: MetricRegistry;
   private readonly _metricsRegistrar?: MetricsRegistrar;
-  private readonly httpRequestsTotal?: Counter<'method' | 'route' | 'status_code'>;
+  private readonly httpRequestsTotal?: Counter;
   private readonly httpRequestsInFlight?: Gauge;
-  private readonly httpRequestDuration?: Histogram<'method' | 'route' | 'status_code'>;
+  private readonly httpRequestDuration?: Histogram;
 
   // Logging
   private readonly logLevel: LogLevel;

@@ -7,6 +7,21 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Documentation
 
+## [0.4.1] - 2026-03-12
+
+### Removed
+
+- **`prom-client`** — removed external dependency; all Prometheus metrics are now pure TypeScript
+- Zero runtime dependencies besides `express`
+
+### Added
+
+- `Counter`, `Gauge`, `Histogram` — pure TypeScript metric types with Prometheus text exposition format
+- `DEFAULT_BUCKETS`, `MetricSample` — public exports for custom metric usage
+- `SwaggerDocs` — replaced `swagger-ui-express` with built-in Swagger UI served via CDN
+- Built-in dark mode support for Swagger UI (system-aware via `prefers-color-scheme`)
+- Cross-language parity with Dart and Python implementations
+
 ## [0.4.0] - 2026-03-03
 
 ### Removed

@@ -8,14 +8,14 @@ describe('MetricRegistry', () => {
     registry = new MetricRegistry();
   });
 
-  it('registers process_start_time_seconds on construction', async () => {
-    const output = await registry.serialize();
+  it('registers process_start_time_seconds on construction', () => {
+    const output = registry.serialize();
     expect(output).toContain('process_start_time_seconds');
     expect(output).toContain('# TYPE process_start_time_seconds gauge');
   });
 
-  it('process_start_time_seconds is set to epoch seconds', async () => {
-    const output = await registry.serialize();
+  it('process_start_time_seconds is set to epoch seconds', () => {
+    const output = registry.serialize();
     const lines = output.split('\n');
     const valueLine = lines.find(
       (l) => l.startsWith('process_start_time_seconds') && !l.startsWith('#'),
@@ -80,7 +80,7 @@ describe('MetricRegistry', () => {
   // Serialization
 
   describe('serialize()', () => {
-    it('serializes counter with HELP, TYPE, and value', async () => {
+    it('serializes counter with HELP, TYPE, and value', () => {
       const counter = registry.createCounter({
         name: 'http_requests_total',
         help: 'Total HTTP requests',
@@ -88,14 +88,14 @@ describe('MetricRegistry', () => {
       });
       counter.inc({ method: 'GET', status_code: '200' });
 
-      const output = await registry.serialize();
+      const output = registry.serialize();
       expect(output).toContain('# HELP http_requests_total Total HTTP requests');
       expect(output).toContain('# TYPE http_requests_total counter');
       expect(output).toContain('method="GET"');
       expect(output).toContain('status_code="200"');
     });
 
-    it('serializes gauge', async () => {
+    it('serializes gauge', () => {
       const gauge = registry.createGauge({
         name: 'temperature',
         help: 'Current temperature',
@@ -103,13 +103,13 @@ describe('MetricRegistry', () => {
       });
       gauge.set({ location: 'office' }, 22.5);
 
-      const output = await registry.serialize();
+      const output = registry.serialize();
       expect(output).toContain('# TYPE temperature gauge');
       expect(output).toContain('location="office"');
       expect(output).toContain('22.5');
     });
 
-    it('serializes histogram with buckets, count, sum', async () => {
+    it('serializes histogram with buckets, count, sum', () => {
       const hist = registry.createHistogram({
         name: 'request_duration',
         help: 'Duration',
@@ -118,17 +118,17 @@ describe('MetricRegistry', () => {
       });
       hist.observe({ method: 'GET' }, 0.3);
 
-      const output = await registry.serialize();
+      const output = registry.serialize();
       expect(output).toContain('# TYPE request_duration histogram');
-      expect(output).toContain('request_duration_bucket{le="0.1",method="GET"} 0');
-      expect(output).toContain('request_duration_bucket{le="0.5",method="GET"} 1');
-      expect(output).toContain('request_duration_bucket{le="1",method="GET"} 1');
+      expect(output).toContain('request_duration_bucket{method="GET",le="0.1"} 0');
+      expect(output).toContain('request_duration_bucket{method="GET",le="0.5"} 1');
+      expect(output).toContain('request_duration_bucket{method="GET",le="1.0"} 1');
       expect(output).toContain('request_duration_count{method="GET"} 1');
       expect(output).toContain('request_duration_sum{method="GET"} 0.3');
     });
 
-    it('ends with newline', async () => {
-      const output = await registry.serialize();
+    it('ends with newline', () => {
+      const output = registry.serialize();
       expect(output).toMatch(/\n$/);
     });
   });
@@ -183,9 +183,9 @@ describe('MetricsRegistrar', () => {
     expect(() => registrar.createCounter({ name: '__internal', help: 'h' })).toThrow();
   });
 
-  it('custom metrics appear in registry serialization', async () => {
+  it('custom metrics appear in registry serialization', () => {
     registrar.createCounter({ name: 'custom_total', help: 'Custom counter' });
-    const output = await registry.serialize();
+    const output = registry.serialize();
     expect(output).toContain('# HELP custom_total Custom counter');
   });
 });

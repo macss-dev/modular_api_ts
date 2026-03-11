@@ -3,13 +3,13 @@ import express from 'express';
 import request from 'supertest';
 import { MetricRegistry } from '../../src/core/metrics/metric_registry';
 import { metricsMiddleware, metricsHandler } from '../../src/core/metrics/metrics_middleware';
-import type { Counter, Gauge, Histogram } from 'prom-client';
+import type { Counter, Gauge, Histogram } from '../../src/core/metrics/metric';
 
 describe('metricsMiddleware', () => {
   let registry: MetricRegistry;
-  let requestsTotal: Counter<'method' | 'route' | 'status_code'>;
+  let requestsTotal: Counter;
   let requestsInFlight: Gauge;
-  let requestDuration: Histogram<'method' | 'route' | 'status_code'>;
+  let requestDuration: Histogram;
 
   beforeEach(() => {
     registry = new MetricRegistry();

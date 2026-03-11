@@ -1,16 +1,17 @@
 // ============================================================
 // core/metrics/metrics_middleware.ts
 // Express middleware + handler for Prometheus metrics.
+// Zero external dependencies — uses pure metric types.
 // ============================================================
 
 import type { RequestHandler } from 'express';
-import type { Counter, Gauge, Histogram } from 'prom-client';
+import type { Counter, Gauge, Histogram } from './metric';
 import type { MetricRegistry } from './metric_registry';
 
 export interface MetricsMiddlewareOptions {
-  requestsTotal: Counter<'method' | 'route' | 'status_code'>;
+  requestsTotal: Counter;
   requestsInFlight: Gauge;
-  requestDuration: Histogram<'method' | 'route' | 'status_code'>;
+  requestDuration: Histogram;
   excludedRoutes: string[];
   registeredPaths: string[];
 }
@@ -62,8 +63,8 @@ export function metricsMiddleware(opts: MetricsMiddlewareOptions): RequestHandle
  * Always returns HTTP 200 with `text/plain; version=0.0.4; charset=utf-8`.
  */
 export function metricsHandler(registry: MetricRegistry): RequestHandler {
-  return async (_req, res) => {
-    const body = await registry.serialize();
+  return (_req, res) => {
+    const body = registry.serialize();
     res.status(200).set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8').send(body);
   };
 }

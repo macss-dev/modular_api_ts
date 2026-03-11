@@ -30,7 +30,9 @@ export { HealthService, HealthResponse } from './core/health/health_service';
 export type { HealthServiceOptions } from './core/health/health_service';
 export { healthHandler } from './core/health/health_handler';
 
-// Metrics — Prometheus /metrics endpoint
+// Metrics — Prometheus /metrics endpoint (zero external dependencies)
+export { Counter, Gauge, Histogram, DEFAULT_BUCKETS } from './core/metrics/metric';
+export type { MetricSample } from './core/metrics/metric';
 export { MetricRegistry, MetricsRegistrar } from './core/metrics/metric_registry';
 export { metricsMiddleware, metricsHandler } from './core/metrics/metrics_middleware';
 export type { MetricsMiddlewareOptions } from './core/metrics/metrics_middleware';
@@ -48,3 +50,6 @@ export {
   openApiJsonHandler,
   openApiYamlHandler,
 } from './openapi/openapi';
+
+// Swagger UI — inline HTML docs handler (PRD-003)
+export { swaggerDocsHandler } from './openapi/swagger_docs';

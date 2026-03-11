@@ -3,7 +3,7 @@
 Use-case centric toolkit for building modular APIs with Express.  
 Define `UseCase` classes (input → validate → execute → output), connect them to HTTP routes, and get automatic Swagger/OpenAPI documentation.
 
-> Also available in **Dart**: [modular_api](https://pub.dev/packages/modular_api)
+> Also available in **Dart**: [modular_api](https://pub.dev/packages/modular_api) · **Python**: [modular-api](https://pypi.org/project/modular-api/)
 
 ---
 

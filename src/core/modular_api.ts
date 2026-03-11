@@ -7,7 +7,7 @@
 import express, { type Express, type RequestHandler, type Router } from 'express';
 import { ModuleBuilder } from './module_builder';
 import { buildOpenApiSpec, openApiJsonHandler, openApiYamlHandler } from '../openapi/openapi';
-import swaggerUi from 'swagger-ui-express';
+import { swaggerDocsHandler } from '../openapi/swagger_docs';
 import type { HealthCheck } from './health/health_check';
 import { HealthService } from './health/health_service';
 import { healthHandler } from './health/health_handler';
@@ -16,7 +16,7 @@ import { metricsMiddleware, metricsHandler } from './metrics/metrics_middleware'
 import { loggingMiddleware } from './logger/logging_middleware';
 import { LogLevel } from './logger/logger';
 import { apiRegistry } from './registry';
-import type { Counter, Gauge, Histogram } from 'prom-client';
+import type { Counter, Gauge, Histogram } from './metrics/metric';
 
 export interface ModularApiOptions {
   /** Base path prefix for all module routes. Default: '/api' */
@@ -78,9 +78,9 @@ export class ModularApi {
   private readonly excludedMetricsRoutes: string[];
   private readonly metricRegistry?: MetricRegistry;
   private readonly _metricsRegistrar?: MetricsRegistrar;
-  private readonly httpRequestsTotal?: Counter<'method' | 'route' | 'status_code'>;
+  private readonly httpRequestsTotal?: Counter;
   private readonly httpRequestsInFlight?: Gauge;
-  private readonly httpRequestDuration?: Histogram<'method' | 'route' | 'status_code'>;
+  private readonly httpRequestDuration?: Histogram;
 
   // Logging
   private readonly logLevel: LogLevel;
@@ -238,11 +238,11 @@ export class ModularApi {
       // Module use case routes.
       this.app.use(this.rootRouter);
 
-      // Swagger / OpenAPI docs
-      const spec = buildOpenApiSpec({ title: this.title, port });
-      this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
+      // Swagger UI docs — inline HTML, no external dependency (PRD-003).
+      this.app.get('/docs', swaggerDocsHandler({ title: this.title }));
 
       // Raw spec endpoints
+      const spec = buildOpenApiSpec({ title: this.title, port });
       this.app.get('/openapi.json', openApiJsonHandler(spec));
       this.app.get('/openapi.yaml', openApiYamlHandler(spec));
 

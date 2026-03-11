@@ -86,11 +86,12 @@ class HelloOutput implements Output {
 
 class HelloWorld implements UseCase<HelloInput, HelloOutput> {
   readonly input: HelloInput;
-  output!: HelloOutput;
+  output: HelloOutput;
   logger?: import('../src/core/logger/logger').ModularLogger;
 
   constructor(input: HelloInput) {
     this.input = input;
+    this.output = new HelloOutput('');
   }
 
   static fromJson(json: Record<string, unknown>): HelloWorld {
@@ -127,6 +128,9 @@ class AlwaysPassHealthCheck extends HealthCheck {
 
 // ─── Server ───────────────────────────────────────────────────────────────────
 
+// First CLI arg overrides the default port (e.g. `npx tsx example/example.ts 9090`).
+const port = Number(process.argv[2]) || 8080;
+
 const api = new ModularApi({
   basePath: '/api',
   title: 'Modular API',
@@ -148,8 +152,8 @@ if (api.metrics) {
 
 api.module('greetings', buildGreetingsModule);
 
-api.serve({ port: 8080 }).then(() => {
+api.serve({ port }).then(() => {
   console.log('====================================');
-  console.log('API  → http://localhost:8080/api/greetings/hello');
+  console.log(`API  → http://localhost:${port}/api/greetings/hello`);
   console.log('====================================');
 });

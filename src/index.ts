@@ -49,5 +49,5 @@ export {
   openApiYamlHandler,
 } from './openapi/openapi';
 
-// Scalar API Reference — inline HTML docs handler (PRD-002)
-export { scalarDocsHandler } from './openapi/scalar_docs';
+// Swagger UI — inline HTML docs handler (PRD-003)
+export { swaggerDocsHandler } from './openapi/swagger_docs';

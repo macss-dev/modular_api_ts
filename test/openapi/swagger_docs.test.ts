@@ -1,11 +1,12 @@
 /**
- * Tests for the Scalar API Reference handler at GET /docs.
+ * Tests for the Swagger UI docs handler at GET /docs.
  *
- * PRD-002 assertions:
+ * PRD-003 assertions:
  *   1. GET /docs returns HTTP 200.
  *   2. Content-Type header is text/html; charset=utf-8.
- *   3. Response body contains data-url="/openapi.json".
- *   4. Response body contains @scalar/api-reference.
+ *   3. Response body contains swagger-ui-dist@5 CDN references.
+ *   4. Response body contains url: "/openapi.json" Swagger UI config.
+ *   5. Response body does NOT contain "scalar" (regression guard).
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
@@ -14,7 +15,7 @@ import type { Server } from 'http';
 import { ModularApi } from '../../src';
 import { apiRegistry } from '../../src/core/registry';
 
-describe('GET /docs — Scalar API Reference (PRD-002)', () => {
+describe('GET /docs — Swagger UI (PRD-003)', () => {
   let server: Server;
 
   afterEach(async () => {
@@ -42,16 +43,28 @@ describe('GET /docs — Scalar API Reference (PRD-002)', () => {
     expect(res.headers['content-type']).toContain('text/html');
   });
 
-  it('body contains data-url="/openapi.json"', async () => {
+  it('body contains swagger-ui-dist@5 CSS', async () => {
     await startServer();
     const res = await request(server).get('/docs');
-    expect(res.text).toContain('data-url="/openapi.json"');
+    expect(res.text).toContain('swagger-ui-dist@5/swagger-ui.css');
   });
 
-  it('body contains @scalar/api-reference CDN script', async () => {
+  it('body contains swagger-ui-dist@5 JS bundle', async () => {
     await startServer();
     const res = await request(server).get('/docs');
-    expect(res.text).toContain('@scalar/api-reference');
+    expect(res.text).toContain('swagger-ui-dist@5/swagger-ui-bundle.js');
+  });
+
+  it('body contains url pointing to /openapi.json', async () => {
+    await startServer();
+    const res = await request(server).get('/docs');
+    expect(res.text).toContain('url: "/openapi.json"');
+  });
+
+  it('body does NOT contain scalar (PRD-003 regression guard)', async () => {
+    await startServer();
+    const res = await request(server).get('/docs');
+    expect(res.text.toLowerCase()).not.toContain('scalar');
   });
 
   it('interpolates the API title in the HTML', async () => {

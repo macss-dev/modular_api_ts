@@ -7,7 +7,7 @@
 import express, { type Express, type RequestHandler, type Router } from 'express';
 import { ModuleBuilder } from './module_builder';
 import { buildOpenApiSpec, openApiJsonHandler, openApiYamlHandler } from '../openapi/openapi';
-import swaggerUi from 'swagger-ui-express';
+import { scalarDocsHandler } from '../openapi/scalar_docs';
 import type { HealthCheck } from './health/health_check';
 import { HealthService } from './health/health_service';
 import { healthHandler } from './health/health_handler';
@@ -238,11 +238,11 @@ export class ModularApi {
       // Module use case routes.
       this.app.use(this.rootRouter);
 
-      // Swagger / OpenAPI docs
-      const spec = buildOpenApiSpec({ title: this.title, port });
-      this.app.use('/docs', swaggerUi.serve, swaggerUi.setup(spec));
+      // Scalar API Reference docs — inline HTML, no external dependency (PRD-002).
+      this.app.get('/docs', scalarDocsHandler({ title: this.title }));
 
       // Raw spec endpoints
+      const spec = buildOpenApiSpec({ title: this.title, port });
       this.app.get('/openapi.json', openApiJsonHandler(spec));
       this.app.get('/openapi.yaml', openApiYamlHandler(spec));
 

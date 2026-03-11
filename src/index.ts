@@ -48,3 +48,6 @@ export {
   openApiJsonHandler,
   openApiYamlHandler,
 } from './openapi/openapi';
+
+// Scalar API Reference — inline HTML docs handler (PRD-002)
+export { scalarDocsHandler } from './openapi/scalar_docs';
